@@ -13,19 +13,27 @@
         android:theme="@style/Theme.PrivatePeriodTracker"
         tools:targetApi="31">
         <activity
+            android:name=".HomeActivity"
+            android:exported="false"
+            android:label="@string/title_activity_home"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.PrivatePeriodTracker" />
+        <activity
             android:name=".LoginActivity"
             android:exported="false"
             android:label="@string/title_activity_create_password"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.PrivatePeriodTracker" />
         <activity
             android:name=".CreatePasswordActivity"
             android:exported="false"
             android:label="@string/title_activity_create_password"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.PrivatePeriodTracker" />
         <activity
             android:name=".EntryActivity"
             android:exported="true"
-            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.PrivatePeriodTracker">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

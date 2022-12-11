@@ -67,50 +67,6 @@ class EncryptionTest {
     }
 
     @Test
-    fun canaryMatches() {
-        val array = ByteArray(abs(Random().nextInt() % 100))
-        Random().nextBytes(array)
-        val generatedString = String(array, Charset.forName("UTF-8"))
-        val encryption = Encryption(generatedString, this.context)
-
-        encryption.saveCanary()
-
-        val files = listFiles(context)
-        assertTrue(files.hasNext())
-
-        val file = files.next()
-        assertTrue(encryption.checkCanary(file))
-
-        assertFalse(files.hasNext())
-    }
-
-    @Test
-    fun canaryNotMatches() {
-        listFiles(context).forEach { file -> file.delete() }
-
-        val array = ByteArray(abs(Random().nextInt() % 100))
-
-        Random().nextBytes(array)
-        val generatedString = String(array, Charset.forName("UTF-8"))
-
-        Random().nextBytes(array)
-        val generatedString2 = String(array, Charset.forName("UTF-8"))
-
-        assertThat(generatedString, not(generatedString2))
-
-        val encryption = Encryption(generatedString, context)
-        encryption.saveCanary()
-
-        val files = listFiles(context)
-        assertTrue(files.hasNext())
-
-        val encryption2 = Encryption(generatedString2, context)
-        assertFalse(encryption2.checkCanary(files.next()))
-
-        assertFalse(files.hasNext())
-    }
-
-    @Test
     fun saveDataAndLoadDataTest()
     {
         val array = ByteArray(abs(Random().nextInt() % 100))

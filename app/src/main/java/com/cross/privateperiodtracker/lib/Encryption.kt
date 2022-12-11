@@ -18,6 +18,7 @@ import java.security.spec.KeySpec
 import java.time.LocalDateTime
 import java.util.Random
 import java.util.UUID
+import javax.crypto.BadPaddingException
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
@@ -107,30 +108,6 @@ class Encryption(private val password: String, private val context: Context) {
         secretKey = keyFromPassword(password, salt)
     }
 
-    fun saveCanary() {
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey, IvParameterSpec(iv))
-        val cipherBytes = cipher.doFinal(password.toByteArray());
-
-        val file = generateFilename(context)
-        val outputStream: OutputStream = FileOutputStream(file)
-        outputStream.write(cipherBytes);
-        outputStream.flush();
-        outputStream.close();
-    }
-
-    fun checkCanary(file: File): Boolean {
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey, IvParameterSpec(iv))
-        val cipherBytes = cipher.doFinal(password.toByteArray());
-
-        val inputStream = FileInputStream(file)
-        val canaryBytes = inputStream.readBytes();
-        inputStream.close();
-
-        return canaryBytes.contentEquals(cipherBytes);
-    }
-
     fun saveData(periodData: PeriodData) {
         val moshi: Moshi =
             Moshi.Builder().add(PeriodEventArrayListMoshiAdapter()).add(LocalDateTimeMoshiAdapter())
@@ -149,40 +126,35 @@ class Encryption(private val password: String, private val context: Context) {
     }
 
     fun loadData(): PeriodData? {
-        var isCanary = false;
         for (file in listFiles(context)) {
-            if (checkCanary(file)) {
-                isCanary = true;
-                break;
-            }
             val pd = decryptFile(file)
             if (pd != null) {
                 return pd
             }
         }
-        if (isCanary) {
-            for (file in listFiles(context)) {
-                file.delete();
-                return generateData();
-            }
-        }
         return null
     }
 
-    fun decryptFile(file: File): PeriodData? {
-        val inputStream = FileInputStream(file)
-        val encryptedData = inputStream.readBytes();
-        inputStream.close();
+    private fun decryptFile(file: File): PeriodData? {
+        try {
+            val inputStream = FileInputStream(file)
+            val encryptedData = inputStream.readBytes();
+            inputStream.close();
 
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(iv))
-        val decryptedBytes = String(cipher.doFinal(encryptedData))
+            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(iv))
+            val decryptedBytes = String(cipher.doFinal(encryptedData))
 
-        val moshi: Moshi =
-            Moshi.Builder().add(PeriodEventArrayListMoshiAdapter()).add(LocalDateTimeMoshiAdapter())
-                .build()
-        val jsonAdapter: JsonAdapter<PeriodData> = moshi.adapter(PeriodData::class.java)
+            val moshi: Moshi =
+                Moshi.Builder().add(PeriodEventArrayListMoshiAdapter())
+                    .add(LocalDateTimeMoshiAdapter())
+                    .build()
+            val jsonAdapter: JsonAdapter<PeriodData> = moshi.adapter(PeriodData::class.java)
 
-        return jsonAdapter.fromJson(decryptedBytes)
+            return jsonAdapter.fromJson(decryptedBytes)
+        } catch (bpe: Exception)
+        {
+            return null
+        }
     }
 }

@@ -5,6 +5,7 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.cross.privateperiodtracker.data.PeriodData
+import com.cross.privateperiodtracker.data.generateData
 import com.cross.privateperiodtracker.lib.Encryption
 
 
@@ -28,7 +29,7 @@ class CreatePasswordActivity : AppCompatActivity() {
                 Encryption(
                     canary,
                     this@CreatePasswordActivity.applicationContext
-                ).saveCanary();
+                ).saveData(generateData());
             }
             finish();
         }

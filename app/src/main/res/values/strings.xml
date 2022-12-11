@@ -20,4 +20,18 @@
     <string name="password">passowrd</string>
     <string name="login">Login</string>
     <string name="enter_password">Enter Password:</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="next_period_in_n_days">Next period in N days…</string>
+    <string name="next_period_in_">Next period in\u0020</string>
+    <string name="_days">\u0020days…</string>
+    <string name="period_will_end_in_">Period will end in\u0020</string>
+    <string name="you_have_been_pregnant_for_">You have been pregnant for\u0020</string>
+    <string name="_days_congrats">\u0020days, Congrats!</string>
+    <string name="your_cycle_is_x_days_and_your_average_period_is_y_days">Your cycle is X days, and your average period is Y days</string>
+    <string name="your_cycle_is_">Your cycle is\u0020</string>
+    <string name="_days_and_your_average_period_is_">\u0020days, and your average period is\u0020</string>
+    <string name="this_is_not_medical_advice_if_you_have_concerns_see_a_medical_professional">This is not medical advice. If you have concerns, see a medical professional</string>
+    <string name="add_event">Add Event</string>
+    <string name="unknown_state">Welcome. Start by adding your last period dates.</string>
+    <string name="wrong_password">Wrong password</string>
 </resources>

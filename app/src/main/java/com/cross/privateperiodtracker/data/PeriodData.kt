@@ -3,6 +3,7 @@ package com.cross.privateperiodtracker.data
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.ToJson
+import java.io.Serializable
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.Random
@@ -17,7 +18,7 @@ enum class EventType {
 }
 
 @JsonClass(generateAdapter = true)
-data class PeriodEvent(val time: LocalDateTime, val type: EventType) {
+data class PeriodEvent(val time: LocalDateTime, val type: EventType) : Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -44,7 +45,7 @@ data class PeriodEvent(val time: LocalDateTime, val type: EventType) {
 data class PeriodStats(val mean: Duration, val variance: Duration)
 
 @JsonClass(generateAdapter = true)
-class PeriodData {
+class PeriodData : Serializable {
     var events: ArrayList<PeriodEvent> = ArrayList<PeriodEvent>()
 
     fun sort() {
@@ -189,6 +190,18 @@ class PeriodData {
             val lastEvent = events[lastIndex];
             if (lastEvent.type == EventType.PeriodStart) {
                 return lastEvent.time + ps.mean;
+            }
+            lastIndex -= 1
+        }
+        return null
+    }
+
+    fun getPregnancyStart(): LocalDateTime? {
+        var lastIndex = events.size - 1;
+        while (lastIndex >= 0) {
+            val lastEvent = events[lastIndex];
+            if (lastEvent.type == EventType.PregnancyStart) {
+                return lastEvent.time;
             }
             lastIndex -= 1
         }
