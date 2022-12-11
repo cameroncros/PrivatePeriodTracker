@@ -1,15 +1,28 @@
 package com.cross.privateperiodtracker
 
 import android.os.Bundle
-import android.widget.CalendarView
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import com.cross.privateperiodtracker.data.CurrentState
-import com.cross.privateperiodtracker.data.EventType
 import com.cross.privateperiodtracker.data.PeriodData
+import com.kizitonwose.calendar.core.CalendarDay
+import com.kizitonwose.calendar.core.CalendarMonth
+import com.kizitonwose.calendar.core.daysOfWeek
+import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
+import com.kizitonwose.calendar.view.MonthDayBinder
+import com.kizitonwose.calendar.view.MonthHeaderFooterBinder
+import com.kizitonwose.calendar.view.ViewContainer
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.Period
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 const val passwordKey: String = "password"
 const val dataKey: String = "data"
@@ -29,6 +42,68 @@ class HomeActivity : AppCompatActivity() {
 
         val stats = findViewById<TextView>(R.id.currentStats)
         stats.text = updateStats(periodData)
+
+        class DayViewContainer(view: View) : ViewContainer(view) {
+            val textView = view.findViewById<TextView>(R.id.calendarDayText)
+        }
+
+        val calendarView = findViewById<com.kizitonwose.calendar.view.CalendarView>(R.id.calendarView);
+        calendarView.dayBinder = object : MonthDayBinder<DayViewContainer> {
+            // Called only when a new container is needed.
+            override fun create(view: View) = DayViewContainer(view)
+
+            // Called every time we need to reuse a container.
+            override fun bind(container: DayViewContainer, data: CalendarDay) {
+                container.textView.text = data.date.dayOfMonth.toString()
+            }
+        }
+        class MonthViewContainer(view: View) : ViewContainer(view) {
+            // Alternatively, you can add an ID to the container layout and use findViewById()
+            val titles = view as ViewGroup
+        }
+
+        val firstDayOfWeek = firstDayOfWeekFromLocale()
+        val daysOfWeek = daysOfWeek(firstDayOfWeek)
+        calendarView.monthHeaderBinder = object : MonthHeaderFooterBinder<MonthViewContainer> {
+            override fun create(view: View) = MonthViewContainer(view)
+            override fun bind(container: MonthViewContainer, data: CalendarMonth) {
+                container.titles.findViewById<TextView>(R.id.currentMonthText).text = data.yearMonth.format(
+                    DateTimeFormatter.ofPattern("yyyy MMM")
+                )
+                container.titles.findViewById<ImageButton>(R.id.prevMonthButton).setOnClickListener {
+                    val prevMonth = data.yearMonth.minusMonths(1)
+                    calendarView.smoothScrollToMonth(prevMonth)
+                }
+                container.titles.findViewById<ImageButton>(R.id.nextMonthButton).setOnClickListener {
+                    val nextMonth = data.yearMonth.plusMonths(1)
+                    calendarView.smoothScrollToMonth(nextMonth)
+                }
+                // Remember that the header is reused so this will be called for each month.
+                // However, the first day of the week will not change so no need to bind
+                // the same view every time it is reused.
+                if (container.titles.tag == null) {
+                    container.titles.tag = data.yearMonth
+                    container.titles.findViewById<LinearLayout>(R.id.dayHeader).children.map { it as TextView }
+                        .forEachIndexed { index, textView ->
+                            val dayOfWeek = daysOfWeek[index]
+                            val title = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                            textView.text = title
+                            // In the code above, we use the same `daysOfWeek` list
+                            // that was created when we set up the calendar.
+                            // However, we can also get the `daysOfWeek` list from the month data:
+                            // val daysOfWeek = data.weekDays.first().map { it.date.dayOfWeek }
+                            // Alternatively, you can get the value for this specific index:
+                            // val dayOfWeek = data.weekDays.first()[index].date.dayOfWeek
+                        }
+                }
+            }
+        }
+
+        val currentMonth = YearMonth.now()
+        val startMonth = currentMonth.minusYears(30)
+        val endMonth = currentMonth.plusYears(30)
+        calendarView.setup(startMonth, endMonth, firstDayOfWeek)
+        calendarView.scrollToMonth(currentMonth)
     }
 
     private fun updateStats(periodData: PeriodData): String {
