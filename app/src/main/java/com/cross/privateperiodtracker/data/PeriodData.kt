@@ -245,13 +245,14 @@ fun didForget(): Boolean {
     return randLong(0, 100) < FORGETFULNESS * 100
 }
 
-const val MAX_GENERATED_DAYS_S: Long = 7 * 365 * 24 * 60 * 60;
-const val MIN_GENERATED_DAYS_S: Long = 3 * 365 * 24 * 60 * 60;
+const val S_IN_DAY: Long = 24 * 60 * 60
+const val MAX_GENERATED_DAYS_S: Long = 7 * 365 * S_IN_DAY;
+const val MIN_GENERATED_DAYS_S: Long = 3 * 365 * S_IN_DAY;
 
-const val MIN_PERIOD_CYCLE_S: Long = 24 * 60 * 60;
-const val MAX_PERIOD_CYCLE_S: Long = 32 * 60 * 60;
-const val MIN_PERIOD_DURATION_S: Long = 2 * 60 * 60;
-const val MAX_PERIOD_DURATION_S: Long = 5 * 60 * 60;
+const val MIN_PERIOD_CYCLE_S: Long = 24 * S_IN_DAY;
+const val MAX_PERIOD_CYCLE_S: Long = 32 * S_IN_DAY;
+const val MIN_PERIOD_DURATION_S: Long = 2 * S_IN_DAY;
+const val MAX_PERIOD_DURATION_S: Long = 5 * S_IN_DAY;
 
 fun generateData(): PeriodData {
     val pd = PeriodData();
