@@ -1,14 +1,17 @@
 package com.cross.privateperiodtracker
 
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import com.cross.privateperiodtracker.data.CurrentState
+import com.cross.privateperiodtracker.data.EventType
 import com.cross.privateperiodtracker.data.PeriodData
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
@@ -45,6 +48,7 @@ class HomeActivity : AppCompatActivity() {
 
         class DayViewContainer(view: View) : ViewContainer(view) {
             val textView = view.findViewById<TextView>(R.id.calendarDayText)
+            val icon = view.findViewById<ImageView>(R.id.calendarDayIcon)
         }
 
         val calendarView = findViewById<com.kizitonwose.calendar.view.CalendarView>(R.id.calendarView);
@@ -55,6 +59,28 @@ class HomeActivity : AppCompatActivity() {
             // Called every time we need to reuse a container.
             override fun bind(container: DayViewContainer, data: CalendarDay) {
                 container.textView.text = data.date.dayOfMonth.toString()
+                val events = periodData.getDayEvents(data.date)
+                if (events != null)
+                {
+                    container.icon.visibility = View.VISIBLE
+                    when (events[0].type) {
+                        EventType.PeriodStart -> {
+                            container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_arrow_back_ios_24))
+                        }
+                        EventType.PeriodEnd -> {
+                            container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_arrow_forward_ios_24))
+
+                        }
+
+                        else -> {
+                            container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_bloodtype_24))
+                        }
+                    }
+                }
+                else
+                {
+                    container.icon.visibility = View.INVISIBLE
+                }
             }
         }
         class MonthViewContainer(view: View) : ViewContainer(view) {

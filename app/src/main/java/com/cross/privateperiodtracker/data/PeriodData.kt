@@ -5,7 +5,9 @@ import com.squareup.moshi.JsonClass
 import com.squareup.moshi.ToJson
 import java.io.Serializable
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 import java.util.Random
 import kotlin.math.abs
 
@@ -43,10 +45,41 @@ data class PeriodEvent(val time: LocalDateTime, val type: EventType) : Serializa
 }
 
 data class PeriodStats(val mean: Duration, val variance: Duration)
+data class MonthYear(val month: Month, val year: Int)
 
 @JsonClass(generateAdapter = true)
 class PeriodData : Serializable {
     var events: ArrayList<PeriodEvent> = ArrayList<PeriodEvent>()
+
+    @Transient
+    var index: HashMap<MonthYear, ArrayList<PeriodEvent>> =
+        HashMap<MonthYear, ArrayList<PeriodEvent>>()
+
+    private fun addIndex(event: PeriodEvent) {
+        val date = event.time.toLocalDate()
+        val key = MonthYear(date.month, date.year)
+        if (!index.containsKey(key)) {
+            index[key] = ArrayList<PeriodEvent>()
+        }
+        index[key]?.add(event)
+    }
+
+    private fun rebuildIndex() {
+        index = HashMap<MonthYear, ArrayList<PeriodEvent>>();
+
+        for (event in events) {
+            addIndex(event);
+        }
+    }
+
+    fun getMonthEvents(date: LocalDate): ArrayList<PeriodEvent>? {
+        val key = MonthYear(date.month, date.year)
+        if (index == null || index.size == 0) {
+            rebuildIndex();
+        }
+
+        return index[key];
+    }
 
     fun sort() {
         events.sortedWith(compareBy { it.time })
@@ -54,6 +87,7 @@ class PeriodData : Serializable {
 
     fun addEvent(event: PeriodEvent) {
         events.add(event)
+        addIndex(event)
         sort()
     }
 
@@ -72,10 +106,17 @@ class PeriodData : Serializable {
         return PeriodStats(meanDuration, varDuration);
     }
 
-    fun getCurrentState(): CurrentState {
-        var lastIndex = events.size - 1;
+    fun getState(date_in : LocalDate?): CurrentState {
+        var date = LocalDate.now()
+        if (date != null)
+        {
+            date = date_in
+        }
+        val monthData = getMonthEvents(date) ?: return CurrentState.Unknown
+
+        var lastIndex = monthData.size - 1;
         while (lastIndex >= 0) {
-            val lastEvent = events[lastIndex]
+            val lastEvent = monthData[lastIndex]
             when (lastEvent.type) {
                 EventType.PeriodStart -> {
                     return CurrentState.Period
@@ -215,10 +256,8 @@ class PeriodData : Serializable {
         other as PeriodData
 
         if (events.size != other.events.size) return false
-        for (event in events)
-        {
-            if (!other.events.contains(event))
-            {
+        for (event in events) {
+            if (!other.events.contains(event)) {
                 return false
             }
         }
@@ -258,7 +297,7 @@ fun generateData(): PeriodData {
     val pd = PeriodData();
     var startDate =
         LocalDateTime.now().minusSeconds(randLong(MIN_GENERATED_DAYS_S, MAX_GENERATED_DAYS_S));
-// Future: Generate tampon events, generate pregnancy events??
+    // Future: Generate tampon events, generate pregnancy events??
     while (startDate < LocalDateTime.now()) {
         val periodDurationLength = randLong(MIN_PERIOD_DURATION_S, MAX_PERIOD_DURATION_S)
         val periodCycleLength = randLong(MIN_PERIOD_CYCLE_S, MAX_PERIOD_CYCLE_S)
