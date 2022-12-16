@@ -1,8 +1,6 @@
 package com.cross.privateperiodtracker.data
 
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonClass
-import com.squareup.moshi.ToJson
 import java.io.Serializable
 import java.time.Duration
 import java.time.LocalDate
@@ -49,11 +47,10 @@ data class MonthYear(val month: Month, val year: Int)
 
 @JsonClass(generateAdapter = true)
 class PeriodData : Serializable {
-    var events: ArrayList<PeriodEvent> = ArrayList<PeriodEvent>()
+    var events: ArrayList<PeriodEvent> = ArrayList()
 
     @Transient
-    var index: HashMap<MonthYear, ArrayList<PeriodEvent>> =
-        HashMap<MonthYear, ArrayList<PeriodEvent>>()
+    var index: HashMap<MonthYear, ArrayList<PeriodEvent>> = HashMap()
 
     private fun addIndex(event: PeriodEvent) {
         val date = event.time.toLocalDate()
@@ -65,20 +62,30 @@ class PeriodData : Serializable {
     }
 
     private fun rebuildIndex() {
-        index = HashMap<MonthYear, ArrayList<PeriodEvent>>();
+        index = HashMap();
 
         for (event in events) {
             addIndex(event);
         }
     }
 
-    fun getMonthEvents(date: LocalDate): ArrayList<PeriodEvent>? {
+    fun getMonthEvents(date: LocalDate): ArrayList<PeriodEvent> {
         val key = MonthYear(date.month, date.year)
         if (index == null || index.size == 0) {
             rebuildIndex();
         }
+        return index.getOrDefault(key, ArrayList());
+    }
 
-        return index[key];
+    fun getDayEvents(date: LocalDate): ArrayList<PeriodEvent> {
+        val dayEvents = ArrayList<PeriodEvent>()
+        val monthEvents = getMonthEvents(date)
+        for (event in monthEvents) {
+            if (event.time.toLocalDate() == date) {
+                dayEvents.add(event)
+            }
+        }
+        return dayEvents
     }
 
     fun sort() {
@@ -106,7 +113,7 @@ class PeriodData : Serializable {
         return PeriodStats(meanDuration, varDuration);
     }
 
-    fun getState(date_in : LocalDate?): CurrentState {
+    fun getState(date_in : LocalDate = LocalDate.now()): CurrentState {
         var date = LocalDate.now()
         if (date != null)
         {

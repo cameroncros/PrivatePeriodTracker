@@ -60,20 +60,18 @@ class HomeActivity : AppCompatActivity() {
             override fun bind(container: DayViewContainer, data: CalendarDay) {
                 container.textView.text = data.date.dayOfMonth.toString()
                 val events = periodData.getDayEvents(data.date)
-                if (events != null)
+                if (events.size > 0)
                 {
                     container.icon.visibility = View.VISIBLE
                     when (events[0].type) {
                         EventType.PeriodStart -> {
-                            container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_arrow_back_ios_24))
+                            container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_bloodtype_24))
                         }
                         EventType.PeriodEnd -> {
-                            container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_arrow_forward_ios_24))
-
+                            container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_check_circle_24))
                         }
-
                         else -> {
-                            container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_bloodtype_24))
+                            container.icon.visibility = View.INVISIBLE
                         }
                     }
                 }
@@ -155,7 +153,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun updateStatus(periodData: PeriodData): String {
-        when (periodData.getCurrentState()) {
+        when (periodData.getState()) {
             CurrentState.Period -> {
                 val endDate = periodData.calcEndOfPeriodDate()
                 val delta = Duration.between(endDate, LocalDateTime.now())
