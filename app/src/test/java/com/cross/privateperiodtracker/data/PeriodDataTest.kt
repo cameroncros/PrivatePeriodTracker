@@ -25,36 +25,36 @@ class PeriodDataTest {
     }
 
     @Test
-    fun getCurrentStateTest_Unknown() {
+    fun getStateTest_Unknown() {
         val pd = PeriodData()
-        assertEquals(CurrentState.Unknown, pd.getCurrentState())
+        assertEquals(CurrentState.Unknown, pd.getState())
     }
 
     @Test
-    fun getCurrentStateTest_Period() {
+    fun getStateTest_Period() {
         val pd = PeriodData()
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodStart))
-        assertEquals(CurrentState.Period, pd.getCurrentState())
+        assertEquals(CurrentState.Period, pd.getState())
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.Painkiller))
-        assertEquals(CurrentState.Period, pd.getCurrentState())
+        assertEquals(CurrentState.Period, pd.getState())
     }
 
     @Test
-    fun getCurrentStateTest_Freedom() {
+    fun getStateTest_Freedom() {
         val pd = PeriodData()
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodEnd))
-        assertEquals(CurrentState.Freedom, pd.getCurrentState())
+        assertEquals(CurrentState.Freedom, pd.getState())
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.Painkiller))
-        assertEquals(CurrentState.Freedom, pd.getCurrentState())
+        assertEquals(CurrentState.Freedom, pd.getState())
     }
 
     @Test
-    fun getCurrentStateTest_Pregnant() {
+    fun getStateTest_Pregnant() {
         val pd = PeriodData()
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PregnancyStart))
-        assertEquals(CurrentState.Pregnant, pd.getCurrentState())
+        assertEquals(CurrentState.Pregnant, pd.getState())
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.Painkiller))
-        assertEquals(CurrentState.Pregnant, pd.getCurrentState())
+        assertEquals(CurrentState.Pregnant, pd.getState())
     }
 
     @Test

@@ -42,7 +42,7 @@ data class PeriodEvent(val time: LocalDateTime, val type: EventType) : Serializa
     }
 }
 
-data class PeriodStats(val mean: Duration, val variance: Duration)
+data class PeriodStats(val mean: Duration, val sd: Duration)
 data class MonthYear(val month: Month, val year: Int)
 
 @JsonClass(generateAdapter = true)
@@ -107,10 +107,10 @@ class PeriodData : Serializable {
         val meanDuration = Duration.ofMinutes(mean.toLong());
 
         // Calculate the variance
-        val variance = Stats.variance(minutes);
-        val varDuration = Duration.ofMinutes(variance.toLong());
+        val sd = Stats.sd(minutes);
+        val sdDuration = Duration.ofMinutes(sd.toLong());
 
-        return PeriodStats(meanDuration, varDuration);
+        return PeriodStats(meanDuration, sdDuration);
     }
 
     fun getState(date_in : LocalDate = LocalDate.now()): CurrentState {

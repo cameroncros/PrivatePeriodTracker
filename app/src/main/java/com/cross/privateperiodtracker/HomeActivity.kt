@@ -135,16 +135,16 @@ class HomeActivity : AppCompatActivity() {
         val sb = StringBuilder()
         sb.append(resources.getString(R.string.your_cycle_is_))
         sb.append(cycleStats.mean.toDays())
-        if (cycleStats.variance.toDays() > 1) {
+        if (cycleStats.sd.toDays() > 1) {
             sb.append("(±")
-            sb.append(cycleStats.variance.toDays())
+            sb.append(cycleStats.sd.toDays())
             sb.append(")")
         }
         sb.append(resources.getString(R.string._days_and_your_average_period_is_))
         sb.append(durationStats.mean.toDays())
-        if (durationStats.variance.toDays() > 1) {
+        if (durationStats.sd.toDays() > 1) {
             sb.append("(±")
-            sb.append(durationStats.variance.toDays())
+            sb.append(durationStats.sd.toDays())
             sb.append(")")
         }
         sb.append(resources.getString(R.string._days))
@@ -155,7 +155,7 @@ class HomeActivity : AppCompatActivity() {
         when (periodData.getState()) {
             CurrentState.Period -> {
                 val endDate = periodData.calcEndOfPeriodDate()
-                val delta = Duration.between(endDate, LocalDateTime.now())
+                val delta = Duration.between(LocalDateTime.now(), endDate)
                 val sb = StringBuilder()
                 sb.append(resources.getString(R.string.period_will_end_in_))
                 sb.append(delta.toDays())
@@ -165,7 +165,7 @@ class HomeActivity : AppCompatActivity() {
 
             CurrentState.Freedom -> {
                 val endDate = periodData.calcNextPeriodDate()
-                val delta = Duration.between(endDate, LocalDateTime.now())
+                val delta = Duration.between(LocalDateTime.now(), endDate)
                 val sb = StringBuilder()
                 sb.append(resources.getString(R.string.next_period_in_))
                 sb.append(delta.toDays())
