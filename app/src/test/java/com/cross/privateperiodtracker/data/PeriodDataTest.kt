@@ -14,9 +14,9 @@ class PeriodDataTest {
     @Test
     fun randLongTest() {
         for (i in 1..10000) {
-            val r = randLong(50, 100);
-            assertThat(r, greaterThanOrEqualTo(50));
-            assertThat(r, lessThanOrEqualTo(100));
+            val r = randLong(50, 100)
+            assertThat(r, greaterThanOrEqualTo(50))
+            assertThat(r, lessThanOrEqualTo(100))
         }
     }
 
@@ -81,9 +81,8 @@ class PeriodDataTest {
 
     @Test
     fun calcNextPeriodDateTest_Unknown() {
-        val pd= PeriodData()
-        for (i in 0..3)
-        {
+        val pd = PeriodData()
+        for (i in 0..3) {
             pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodEnd))
             assertNull(pd.calcNextPeriodDate())
         }
@@ -91,10 +90,9 @@ class PeriodDataTest {
 
     @Test
     fun calcNextPeriodDateTest_Valid() {
-        val pd= PeriodData()
+        val pd = PeriodData()
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodStart))
-        for (i in 0..3)
-        {
+        for (i in 0..3) {
             pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodEnd))
             assertNotNull(pd.calcNextPeriodDate())
         }
@@ -102,9 +100,8 @@ class PeriodDataTest {
 
     @Test
     fun calcEndOfPeriodDate_Unknown() {
-        val pd= PeriodData()
-        for (i in 0..3)
-        {
+        val pd = PeriodData()
+        for (i in 0..3) {
             pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodEnd))
             assertNull(pd.calcNextPeriodDate())
         }

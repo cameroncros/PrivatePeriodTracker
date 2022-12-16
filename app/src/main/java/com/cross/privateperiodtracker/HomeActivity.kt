@@ -1,6 +1,5 @@
 package com.cross.privateperiodtracker
 
-import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup

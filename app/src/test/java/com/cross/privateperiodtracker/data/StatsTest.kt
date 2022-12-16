@@ -10,20 +10,20 @@ import org.junit.Test
 class StatsTest {
     @Test
     fun meanTest() {
-        val array = ArrayList<Long>(listOf(1, 2, 3, 4, 5));
-        assertEquals(3.0, mean(array), 0.01);
+        val array = ArrayList<Long>(listOf(1, 2, 3, 4, 5))
+        assertEquals(3.0, mean(array), 0.01)
     }
 
     @Test
     fun varianceTest() {
-        val array = ArrayList<Long>(listOf(1, 2, 3, 4, 5));
-        assertEquals(2.5, variance(array), 0.001);
+        val array = ArrayList<Long>(listOf(1, 2, 3, 4, 5))
+        assertEquals(2.5, variance(array), 0.001)
     }
 
     @Test
     fun sdTest() {
-        val array = ArrayList<Long>(listOf(1, 2, 3, 4, 5));
-        assertEquals(1.5811, sd(array), 0.001);
+        val array = ArrayList<Long>(listOf(1, 2, 3, 4, 5))
+        assertEquals(1.5811, sd(array), 0.001)
     }
 
     @Test

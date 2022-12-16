@@ -5,8 +5,6 @@ import android.content.SharedPreferences
 import android.util.Base64
 import com.cross.privateperiodtracker.data.PeriodData
 import com.cross.privateperiodtracker.data.generateData
-import junit.framework.TestCase.assertFalse
-import junit.framework.TestCase.assertTrue
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
@@ -25,7 +23,7 @@ import kotlin.math.abs
 
 class EncryptionTest {
 
-    private lateinit var context: Context;
+    private lateinit var context: Context
 
     @Before
     fun setUp() {
@@ -50,8 +48,7 @@ class EncryptionTest {
     }
 
     @After
-    fun tearDown()
-    {
+    fun tearDown() {
         listFiles(context).forEach { file -> file.delete() }
     }
 
@@ -67,19 +64,18 @@ class EncryptionTest {
     }
 
     @Test
-    fun saveDataAndLoadDataTest()
-    {
+    fun saveDataAndLoadDataTest() {
         val array = ByteArray(abs(Random().nextInt() % 100))
 
         Random().nextBytes(array)
         val generatedString = String(array, Charset.forName("UTF-8"))
 
-        val data : PeriodData = generateData()
+        val data: PeriodData = generateData()
 
         val encryption = Encryption(generatedString, context)
         encryption.saveData(data)
 
-        val data2 : PeriodData? = encryption.loadData();
+        val data2: PeriodData? = encryption.loadData()
 
         assertNotNull(data2)
         assertEquals(data, data2)
