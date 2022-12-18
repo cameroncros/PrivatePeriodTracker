@@ -1,17 +1,23 @@
 package com.cross.privateperiodtracker
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import com.cross.privateperiodtracker.data.CurrentState
 import com.cross.privateperiodtracker.data.EventType
 import com.cross.privateperiodtracker.data.PeriodData
+import com.cross.privateperiodtracker.data.PeriodEvent
+import com.cross.privateperiodtracker.lib.Encryption
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.daysOfWeek
@@ -26,23 +32,18 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-const val passwordKey: String = "password"
 const val dataKey: String = "data"
+const val eventKey: String = "event"
 
 class HomeActivity : AppCompatActivity() {
+    private lateinit var encryption: Encryption
+    private lateinit var periodData: PeriodData
+    private lateinit var status: TextView
+    private lateinit var stats: TextView
+    private lateinit var calendarView : com.kizitonwose.calendar.view.CalendarView
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.home_activity)
-
-        val periodData: PeriodData =
-            intent.getSerializableExtra(dataKey) as PeriodData;
-        val password = intent.getStringExtra(passwordKey);
-
-        val status = findViewById<TextView>(R.id.currentStatus)
+    fun update(periodData: PeriodData) {
         status.text = updateStatus(periodData)
-
-        val stats = findViewById<TextView>(R.id.currentStats)
         stats.text = updateStats(periodData)
 
         class DayViewContainer(view: View) : ViewContainer(view) {
@@ -50,36 +51,36 @@ class HomeActivity : AppCompatActivity() {
             val icon = view.findViewById<ImageView>(R.id.calendarDayIcon)
         }
 
-        val calendarView = findViewById<com.kizitonwose.calendar.view.CalendarView>(R.id.calendarView);
-        calendarView.dayBinder = object : MonthDayBinder<DayViewContainer> {
-            // Called only when a new container is needed.
-            override fun create(view: View) = DayViewContainer(view)
+        calendarView.dayBinder =
+            object : MonthDayBinder<DayViewContainer> {
+                // Called only when a new container is needed.
+                override fun create(view: View) = DayViewContainer(view)
 
-            // Called every time we need to reuse a container.
-            override fun bind(container: DayViewContainer, data: CalendarDay) {
-                container.textView.text = data.date.dayOfMonth.toString()
-                val events = periodData.getDayEvents(data.date)
-                if (events.size > 0)
-                {
-                    container.icon.visibility = View.VISIBLE
-                    when (events[0].type) {
-                        EventType.PeriodStart -> {
-                            container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_bloodtype_24))
+                // Called every time we need to reuse a container.
+                override fun bind(container: DayViewContainer, data: CalendarDay) {
+                    container.textView.text = data.date.dayOfMonth.toString()
+                    val events = periodData.getDayEvents(data.date)
+                    if (events.size > 0) {
+                        container.icon.visibility = View.VISIBLE
+                        when (events[0].type) {
+                            EventType.PeriodStart -> {
+                                container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_bloodtype_24))
+                            }
+
+                            EventType.PeriodEnd -> {
+                                container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_check_circle_24))
+                            }
+
+                            else -> {
+                                container.icon.visibility = View.INVISIBLE
+                            }
                         }
-                        EventType.PeriodEnd -> {
-                            container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_check_circle_24))
-                        }
-                        else -> {
-                            container.icon.visibility = View.INVISIBLE
-                        }
+                    } else {
+                        container.icon.visibility = View.INVISIBLE
                     }
                 }
-                else
-                {
-                    container.icon.visibility = View.INVISIBLE
-                }
             }
-        }
+
         class MonthViewContainer(view: View) : ViewContainer(view) {
             // Alternatively, you can add an ID to the container layout and use findViewById()
             val titles = view as ViewGroup
@@ -87,46 +88,74 @@ class HomeActivity : AppCompatActivity() {
 
         val firstDayOfWeek = firstDayOfWeekFromLocale()
         val daysOfWeek = daysOfWeek(firstDayOfWeek)
-        calendarView.monthHeaderBinder = object : MonthHeaderFooterBinder<MonthViewContainer> {
-            override fun create(view: View) = MonthViewContainer(view)
-            override fun bind(container: MonthViewContainer, data: CalendarMonth) {
-                container.titles.findViewById<TextView>(R.id.currentMonthText).text = data.yearMonth.format(
-                    DateTimeFormatter.ofPattern("yyyy MMM")
-                )
-                container.titles.findViewById<ImageButton>(R.id.prevMonthButton).setOnClickListener {
-                    val prevMonth = data.yearMonth.minusMonths(1)
-                    calendarView.smoothScrollToMonth(prevMonth)
-                }
-                container.titles.findViewById<ImageButton>(R.id.nextMonthButton).setOnClickListener {
-                    val nextMonth = data.yearMonth.plusMonths(1)
-                    calendarView.smoothScrollToMonth(nextMonth)
-                }
-                // Remember that the header is reused so this will be called for each month.
-                // However, the first day of the week will not change so no need to bind
-                // the same view every time it is reused.
-                if (container.titles.tag == null) {
-                    container.titles.tag = data.yearMonth
-                    container.titles.findViewById<LinearLayout>(R.id.dayHeader).children.map { it as TextView }
-                        .forEachIndexed { index, textView ->
-                            val dayOfWeek = daysOfWeek[index]
-                            val title = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-                            textView.text = title
-                            // In the code above, we use the same `daysOfWeek` list
-                            // that was created when we set up the calendar.
-                            // However, we can also get the `daysOfWeek` list from the month data:
-                            // val daysOfWeek = data.weekDays.first().map { it.date.dayOfWeek }
-                            // Alternatively, you can get the value for this specific index:
-                            // val dayOfWeek = data.weekDays.first()[index].date.dayOfWeek
+        calendarView.monthHeaderBinder =
+            object : MonthHeaderFooterBinder<MonthViewContainer> {
+                override fun create(view: View) = MonthViewContainer(view)
+                override fun bind(container: MonthViewContainer, data: CalendarMonth) {
+                    container.titles.findViewById<TextView>(R.id.currentMonthText).text =
+                        data.yearMonth.format(
+                            DateTimeFormatter.ofPattern("yyyy MMM")
+                        )
+                    container.titles.findViewById<ImageButton>(R.id.prevMonthButton)
+                        .setOnClickListener {
+                            val prevMonth = data.yearMonth.minusMonths(1)
+                            calendarView.smoothScrollToMonth(prevMonth)
                         }
+                    container.titles.findViewById<ImageButton>(R.id.nextMonthButton)
+                        .setOnClickListener {
+                            val nextMonth = data.yearMonth.plusMonths(1)
+                            calendarView.smoothScrollToMonth(nextMonth)
+                        }
+
+                    if (container.titles.tag == null) {
+                        container.titles.tag = data.yearMonth
+                        container.titles.findViewById<LinearLayout>(R.id.dayHeader).children.map { it as TextView }
+                            .forEachIndexed { index, textView ->
+                                val dayOfWeek = daysOfWeek[index]
+                                val title =
+                                    dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                                textView.text = title
+                            }
+                    }
                 }
             }
-        }
 
         val currentMonth = YearMonth.now()
         val startMonth = currentMonth.minusYears(30)
         val endMonth = currentMonth.plusYears(30)
         calendarView.setup(startMonth, endMonth, firstDayOfWeek)
         calendarView.scrollToMonth(currentMonth)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.home_activity)
+
+        encryption =
+            intent.getSerializableExtra(dataKey) as Encryption;
+        val periodData = encryption.data!!;
+
+        status = findViewById(R.id.currentStatus)
+        stats = findViewById(R.id.currentStats)
+        calendarView = findViewById(R.id.calendarView);
+
+        val intentLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val event: PeriodEvent =
+                        result.data?.getSerializableExtra(eventKey) as PeriodEvent
+                    periodData.addEvent(event)
+                    encryption.saveData(periodData)
+                    update(periodData)
+                }
+            }
+        val addEventButton = findViewById<Button>(R.id.addEvent);
+        addEventButton.setOnClickListener {
+            val k = Intent(this, AddEventActivity::class.java)
+            intentLauncher.launch(k);
+        }
+
+        update(periodData)
     }
 
     private fun updateStats(periodData: PeriodData): String {

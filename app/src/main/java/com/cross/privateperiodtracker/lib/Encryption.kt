@@ -14,6 +14,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.io.Serializable
 import java.security.spec.KeySpec
 import java.time.LocalDateTime
 import java.util.Random
@@ -47,12 +48,14 @@ fun keyFromPassword(password: String, salt: ByteArray): SecretKey {
     return SecretKeySpec(secretKeyFactory.generateSecret(keySpec).encoded, "AES");
 }
 
-fun generateFilename(context: Context): File {
-    return File(context.filesDir.canonicalPath + File.separator +  "file_" + UUID.randomUUID().toString())
+fun generateFilename(filesDir: File): File {
+    return File(
+        filesDir.canonicalPath + File.separator + "file_" + UUID.randomUUID().toString()
+    )
 }
 
-fun listFiles(context: Context) = iterator {
-    val dir = context.filesDir.listFiles() ?: return@iterator
+fun listFiles(filesDir: File) = iterator {
+    val dir = filesDir.listFiles() ?: return@iterator
     for (file in dir) {
         if (file.isDirectory) {
             continue;
@@ -80,9 +83,12 @@ class LocalDateTimeMoshiAdapter {
     fun localDateTimeFromJson(string: String): LocalDateTime = LocalDateTime.parse(string)
 }
 
-class Encryption(private val password: String, private val context: Context) {
+class Encryption(password: String, context: Context) : Serializable {
     private val secretKey: SecretKey;
     private var iv: ByteArray?;
+    private var file: File? = null;
+    var data: PeriodData? = null;
+    private lateinit var filesDir: File;
 
     init {
         val sp = context.getSharedPreferences("main", MODE_PRIVATE);
@@ -105,6 +111,7 @@ class Encryption(private val password: String, private val context: Context) {
             iv = Base64.decode(sp.getString("iv", null), Base64.DEFAULT);
         }
 
+        filesDir = context.filesDir
         secretKey = keyFromPassword(password, salt)
     }
 
@@ -120,15 +127,20 @@ class Encryption(private val password: String, private val context: Context) {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, IvParameterSpec(iv))
         val cipherBytes = cipher.doFinal(json.toByteArray());
 
-        val outputStream = FileOutputStream(generateFilename(context))
+        if (file == null) {
+            file = generateFilename(filesDir)
+        }
+        val outputStream = FileOutputStream(file)
         outputStream.write(cipherBytes);
         outputStream.close();
     }
 
     fun loadData(): PeriodData? {
-        for (file in listFiles(context)) {
+        for (file in listFiles(filesDir)) {
             val pd = decryptFile(file)
             if (pd != null) {
+                this.file = file
+                this.data = pd
                 return pd
             }
         }
@@ -152,8 +164,7 @@ class Encryption(private val password: String, private val context: Context) {
             val jsonAdapter: JsonAdapter<PeriodData> = moshi.adapter(PeriodData::class.java)
 
             return jsonAdapter.fromJson(decryptedBytes)
-        } catch (bpe: Exception)
-        {
+        } catch (bpe: Exception) {
             return null
         }
     }

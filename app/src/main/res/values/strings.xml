@@ -34,4 +34,13 @@
     <string name="add_event">Add Event</string>
     <string name="unknown_state">Welcome. Start by adding your last period dates.</string>
     <string name="wrong_password">Wrong password</string>
+    <string name="save_event">Save Event</string>
+    <string name="title_activity_add_event">Add Event</string>
+    <string name="painkiller">Painkiller</string>
+    <string name="pregnancy_start">Pregnancy Start</string>
+    <string name="pregnancy_stop">Pregnancy Stop</string>
+    <string name="period_end">Period End</string>
+    <string name="period_start">Period Start</string>
+    <string name="_12_00_pm">12:00 PM</string>
+    <string name="tampon">Tampon</string>
 </resources>

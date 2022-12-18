@@ -19,18 +19,17 @@ class LoginActivity : AppCompatActivity() {
         saveButton.setOnClickListener {
             val passwordText: EditText = findViewById(R.id.textPassword);
             val password = passwordText.text.toString()
+            passwordText.setText("");
 
-            val data = Encryption(password, applicationContext).loadData()
-            if (data == null)
+            val enc = Encryption(password, applicationContext)
+            if (enc.loadData() == null)
             {
-                passwordText.setText("");
                 Toast.makeText(this, resources.getString(R.string.wrong_password), Toast.LENGTH_SHORT).show();
                 return@setOnClickListener
             }
 
             val k = Intent(this, HomeActivity::class.java)
-            k.putExtra(passwordKey, password)
-            k.putExtra(dataKey, data)
+            k.putExtra(dataKey, enc)
             startActivity(k);
         }
     }

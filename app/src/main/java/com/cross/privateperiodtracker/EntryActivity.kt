@@ -10,7 +10,7 @@ class EntryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (!listFiles(applicationContext).hasNext()) {
+        if (!listFiles(applicationContext.filesDir).hasNext()) {
             val k = Intent(this, CreatePasswordActivity::class.java)
             startActivity(k)
         }
@@ -19,7 +19,7 @@ class EntryActivity : AppCompatActivity() {
     override fun onStart()
     {
         super.onStart()
-        if (listFiles(applicationContext).hasNext()) {
+        if (listFiles(applicationContext.filesDir).hasNext()) {
             val k = Intent(this, LoginActivity::class.java)
             startActivity(k)
             finish()
@@ -29,7 +29,7 @@ class EntryActivity : AppCompatActivity() {
     override fun onResume()
     {
         super.onResume()
-        if (listFiles(applicationContext).hasNext()) {
+        if (listFiles(applicationContext.filesDir).hasNext()) {
             val k = Intent(this, LoginActivity::class.java)
             startActivity(k)
             finish()

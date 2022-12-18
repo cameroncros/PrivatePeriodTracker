@@ -19,6 +19,12 @@
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.PrivatePeriodTracker" />
         <activity
+            android:name=".AddEventActivity"
+            android:exported="false"
+            android:label="@string/title_activity_add_event"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.PrivatePeriodTracker" />
+        <activity
             android:name=".LoginActivity"
             android:exported="false"
             android:label="@string/title_activity_create_password"
