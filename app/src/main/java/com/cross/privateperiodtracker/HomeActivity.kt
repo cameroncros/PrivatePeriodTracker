@@ -1,6 +1,9 @@
 package com.cross.privateperiodtracker
 
 import android.app.Activity
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -10,12 +13,15 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.children
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.cross.privateperiodtracker.data.CurrentState
 import com.cross.privateperiodtracker.data.EventType
-import com.cross.privateperiodtracker.data.PeriodData
 import com.cross.privateperiodtracker.data.PeriodEvent
 import com.cross.privateperiodtracker.lib.Encryption
 import com.kizitonwose.calendar.core.CalendarDay
@@ -26,6 +32,7 @@ import com.kizitonwose.calendar.view.MonthDayBinder
 import com.kizitonwose.calendar.view.MonthHeaderFooterBinder
 import com.kizitonwose.calendar.view.ViewContainer
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -37,18 +44,29 @@ const val eventKey: String = "event"
 
 class HomeActivity : AppCompatActivity() {
     private lateinit var encryption: Encryption
-    private lateinit var periodData: PeriodData
     private lateinit var status: TextView
     private lateinit var stats: TextView
     private lateinit var calendarView : com.kizitonwose.calendar.view.CalendarView
+    private lateinit var eventList : RecyclerView
+    private var selectedDay : LocalDate? = null;
 
-    fun update(periodData: PeriodData) {
-        status.text = updateStatus(periodData)
-        stats.text = updateStats(periodData)
+    fun update() {
+        val periodData = encryption.data
+        status.text = updateStatus()
+        stats.text = updateStats()
 
         class DayViewContainer(view: View) : ViewContainer(view) {
             val textView = view.findViewById<TextView>(R.id.calendarDayText)
             val icon = view.findViewById<ImageView>(R.id.calendarDayIcon)
+            // Will be set when this container is bound
+            lateinit var day: LocalDate
+
+            init {
+                view.setOnClickListener {
+                    updateEventList(day)
+                    // Use the CalendarDay associated with this container.
+                }
+            }
         }
 
         calendarView.dayBinder =
@@ -58,21 +76,33 @@ class HomeActivity : AppCompatActivity() {
 
                 // Called every time we need to reuse a container.
                 override fun bind(container: DayViewContainer, data: CalendarDay) {
+                    // Set the calendar day for this container.
+                    container.day = data.date
                     container.textView.text = data.date.dayOfMonth.toString()
                     val events = periodData.getDayEvents(data.date)
                     if (events.size > 0) {
                         container.icon.visibility = View.VISIBLE
                         when (events[0].type) {
                             EventType.PeriodStart -> {
-                                container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_bloodtype_24))
+                                container.icon.setImageDrawable(resources.getDrawable(R.drawable.icon_period_start))
                             }
-
-                            EventType.PeriodEnd -> {
-                                container.icon.setImageDrawable(resources.getDrawable(R.drawable.baseline_check_circle_24))
+                            EventType.PeriodEnd  -> {
+                                container.icon.setImageDrawable(resources.getDrawable(R.drawable.icon_period_end))
                             }
-
-                            else -> {
-                                container.icon.visibility = View.INVISIBLE
+                            EventType.PregnancyStart -> {
+                                container.icon.setImageDrawable(resources.getDrawable(R.drawable.icon_pregnancy_start))
+                            }
+                            EventType.PregnancyEnd -> {
+                                container.icon.setImageDrawable(resources.getDrawable(R.drawable.icon_pregnancy_end))
+                            }
+                            EventType.TamponStart -> {
+                                container.icon.setImageDrawable(resources.getDrawable(R.drawable.icon_tampon_start))
+                            }
+                            EventType.TamponEnd -> {
+                                container.icon.setImageDrawable(resources.getDrawable(R.drawable.icon_tampon_end))
+                            }
+                            EventType.Painkiller -> {
+                                container.icon.setImageDrawable(resources.getDrawable(R.drawable.icon_painkiller))
                             }
                         }
                     } else {
@@ -127,26 +157,34 @@ class HomeActivity : AppCompatActivity() {
         calendarView.scrollToMonth(currentMonth)
     }
 
+    fun updateEventList(day: LocalDate) {
+        selectedDay = day
+        (eventList.adapter as EventListAdapter).updateData(encryption.data.getDayEvents(day))
+        eventList.invalidate()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home_activity)
 
         encryption =
             intent.getSerializableExtra(dataKey) as Encryption;
-        val periodData = encryption.data!!;
 
         status = findViewById(R.id.currentStatus)
         stats = findViewById(R.id.currentStats)
-        calendarView = findViewById(R.id.calendarView);
+        calendarView = findViewById(R.id.calendarView)
+        eventList = findViewById(R.id.eventList)
+        eventList.layoutManager = LinearLayoutManager(this);
+        eventList.adapter = EventListAdapter(::deleteEventCallback)
 
         val intentLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     val event: PeriodEvent =
                         result.data?.getSerializableExtra(eventKey) as PeriodEvent
-                    periodData.addEvent(event)
-                    encryption.saveData(periodData)
-                    update(periodData)
+                    encryption.data.addEvent(event)
+                    encryption.saveData()
+                    update()
                 }
             }
         val addEventButton = findViewById<Button>(R.id.addEvent);
@@ -155,12 +193,48 @@ class HomeActivity : AppCompatActivity() {
             intentLauncher.launch(k);
         }
 
-        update(periodData)
+        update()
+        updateNotifications()
     }
 
-    private fun updateStats(periodData: PeriodData): String {
-        val cycleStats = periodData.calcAveragePeriodCycle()
-        val durationStats = periodData.calcAveragePeriodDuration()
+    private fun deleteEventCallback(event:PeriodEvent)
+    {
+        encryption.data.delete(event)
+        encryption.saveData()
+
+        selectedDay?.let { updateEventList(it) }
+        update()
+        updateNotifications()
+    }
+
+    private fun updateNotifications()
+    {
+        val nextPeriodDate = encryption.data.calcNextPeriodDate() ?: return
+
+        val nextPeriod = Duration.between(nextPeriodDate, LocalDateTime.now())
+        val periodCycle = encryption.data.calcAveragePeriodCycle().mean
+
+        val alarmMgr: AlarmManager =  applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmIntent = Intent(this, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            applicationContext,
+            REQUEST_START,
+            alarmIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmMgr.cancel(pendingIntent);
+
+        alarmMgr.setRepeating(
+            AlarmManager.RTC_WAKEUP,
+            nextPeriod.toMillis(),
+            periodCycle.toMillis(),
+            pendingIntent
+        )
+    }
+
+    private fun updateStats(): String {
+        val cycleStats = encryption.data.calcAveragePeriodCycle()
+        val durationStats = encryption.data.calcAveragePeriodDuration()
         val sb = StringBuilder()
         sb.append(resources.getString(R.string.your_cycle_is_))
         sb.append(cycleStats.mean.toDays())
@@ -180,10 +254,10 @@ class HomeActivity : AppCompatActivity() {
         return sb.toString()
     }
 
-    private fun updateStatus(periodData: PeriodData): String {
-        when (periodData.getState()) {
+    private fun updateStatus(): String {
+        when (encryption.data.getState()) {
             CurrentState.Period -> {
-                val endDate = periodData.calcEndOfPeriodDate()
+                val endDate = encryption.data.calcEndOfPeriodDate() ?: return resources.getString(R.string.need_more_data)
                 val delta = Duration.between(LocalDateTime.now(), endDate)
                 val sb = StringBuilder()
                 sb.append(resources.getString(R.string.period_will_end_in_))
@@ -193,7 +267,7 @@ class HomeActivity : AppCompatActivity() {
             }
 
             CurrentState.Freedom -> {
-                val endDate = periodData.calcNextPeriodDate()
+                val endDate = encryption.data.calcNextPeriodDate() ?: return resources.getString(R.string.need_more_data)
                 val delta = Duration.between(LocalDateTime.now(), endDate)
                 val sb = StringBuilder()
                 sb.append(resources.getString(R.string.next_period_in_))
@@ -203,7 +277,7 @@ class HomeActivity : AppCompatActivity() {
             }
 
             CurrentState.Pregnant -> {
-                val startDate = periodData.getPregnancyStart()
+                val startDate = encryption.data.getPregnancyStart() ?: return resources.getString(R.string.need_more_data)
                 val delta = Duration.between(startDate, LocalDateTime.now())
                 val sb = StringBuilder()
                 sb.append(resources.getString(R.string.you_have_been_pregnant_for_))

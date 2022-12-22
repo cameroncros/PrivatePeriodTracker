@@ -55,7 +55,6 @@ class AddEventActivity : AppCompatActivity() {
             calView.setDate(localdate.toEpochSecond(ZoneOffset.UTC) * 1000, false, false)
         }
 
-
         val radiobuttons = findViewById<RadioGroup>(R.id.radioGroup)
         radiobuttons.check(R.id.radioPeriodStart)
 

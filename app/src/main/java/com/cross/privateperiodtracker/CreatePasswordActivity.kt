@@ -24,12 +24,14 @@ class CreatePasswordActivity : AppCompatActivity() {
             Encryption(
                 password,
                 this@CreatePasswordActivity.applicationContext
-            ).saveData(PeriodData());
+            ).saveData();
             if (canary.isNotEmpty()) {
-                Encryption(
+                val encryption = Encryption(
                     canary,
                     this@CreatePasswordActivity.applicationContext
-                ).saveData(generateData());
+                )
+                encryption.data = generateData();
+                encryption.saveData();
             }
             finish();
         }

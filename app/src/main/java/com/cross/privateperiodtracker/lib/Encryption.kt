@@ -87,8 +87,8 @@ class Encryption(password: String, context: Context) : Serializable {
     private val secretKey: SecretKey;
     private var iv: ByteArray?;
     private var file: File? = null;
-    var data: PeriodData? = null;
-    private lateinit var filesDir: File;
+    var data: PeriodData = PeriodData();
+    private var filesDir: File;
 
     init {
         val sp = context.getSharedPreferences("main", MODE_PRIVATE);
@@ -115,13 +115,13 @@ class Encryption(password: String, context: Context) : Serializable {
         secretKey = keyFromPassword(password, salt)
     }
 
-    fun saveData(periodData: PeriodData) {
+    fun saveData() {
         val moshi: Moshi =
             Moshi.Builder().add(PeriodEventArrayListMoshiAdapter()).add(LocalDateTimeMoshiAdapter())
                 .build()
         val jsonAdapter: JsonAdapter<PeriodData> = moshi.adapter(PeriodData::class.java)
 
-        val json: String = jsonAdapter.toJson(periodData)
+        val json: String = jsonAdapter.toJson(data)
 
         val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, IvParameterSpec(iv))

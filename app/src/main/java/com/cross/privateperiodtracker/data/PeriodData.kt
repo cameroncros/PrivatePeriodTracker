@@ -119,7 +119,7 @@ class PeriodData : Serializable {
         {
             date = date_in
         }
-        val monthData = getMonthEvents(date) ?: return CurrentState.Unknown
+        val monthData = getMonthEvents(date)
 
         var lastIndex = monthData.size - 1;
         while (lastIndex >= 0) {
@@ -147,6 +147,7 @@ class PeriodData : Serializable {
 
     fun calcAveragePeriodCycle(): PeriodStats {
         // Calculate the number of periods, and their lengths.
+        sort()
         val periods: ArrayList<Long> = ArrayList();
         var startTime: LocalDateTime? = null;
         for (event in events) {
@@ -220,11 +221,20 @@ class PeriodData : Serializable {
 
     fun calcNextPeriodDate(): LocalDateTime? {
         val ps = calcAveragePeriodCycle()
+        if (ps.mean <= Duration.ZERO)
+        {
+            return null;
+        }
         var lastIndex = events.size - 1;
         while (lastIndex >= 0) {
             val lastEvent = events[lastIndex];
             if (lastEvent.type == EventType.PeriodStart) {
-                return lastEvent.time + ps.mean;
+                var nextStart = lastEvent.time + ps.mean
+                while (nextStart < LocalDateTime.now())
+                {
+                    nextStart += ps.mean
+                }
+                return nextStart
             }
             lastIndex -= 1
         }
@@ -233,6 +243,10 @@ class PeriodData : Serializable {
 
     fun calcEndOfPeriodDate(): LocalDateTime? {
         val ps = calcAveragePeriodDuration()
+        if (ps.mean <= Duration.ZERO)
+        {
+            return null;
+        }
         var lastIndex = events.size - 1;
         while (lastIndex >= 0) {
             val lastEvent = events[lastIndex];
@@ -279,6 +293,11 @@ class PeriodData : Serializable {
     override fun toString(): String {
         sort()
         return "PeriodData(events=$events)"
+    }
+
+    fun delete(event: PeriodEvent) {
+        events.remove(event);
+        rebuildIndex()
     }
 }
 
