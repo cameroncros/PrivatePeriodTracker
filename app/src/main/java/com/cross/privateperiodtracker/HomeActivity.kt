@@ -1,11 +1,15 @@
 package com.cross.privateperiodtracker
 
+import android.Manifest
 import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
-import android.content.Context
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -13,10 +17,9 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.app.ActivityCompat
 import androidx.core.view.children
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -38,6 +41,7 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
+
 
 const val dataKey: String = "data"
 const val eventKey: String = "event"
@@ -209,27 +213,28 @@ class HomeActivity : AppCompatActivity() {
 
     private fun updateNotifications()
     {
+        if (ActivityCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                0)
+        }
+
         val nextPeriodDate = encryption.data.calcNextPeriodDate() ?: return
-
+        nextPeriodDate.minusDays(1)
         val nextPeriod = Duration.between(nextPeriodDate, LocalDateTime.now())
-        val periodCycle = encryption.data.calcAveragePeriodCycle().mean
 
-        val alarmMgr: AlarmManager =  applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val alarmIntent = Intent(this, AlarmReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            applicationContext,
-            REQUEST_START,
-            alarmIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmMgr.cancel(pendingIntent);
+        this.registerReceiver(AlarmReceiver(), IntentFilter("cross.privateperiodtracker.NEXT_PERIOD_DUE"))
 
-        alarmMgr.setRepeating(
-            AlarmManager.RTC_WAKEUP,
-            nextPeriod.toMillis(),
-            periodCycle.toMillis(),
-            pendingIntent
-        )
+        val pintent = PendingIntent.getBroadcast(this, 0, Intent("cross.privateperiodtracker.NEXT_PERIOD_DUE"), FLAG_IMMUTABLE)
+        val manager = this.getSystemService(ALARM_SERVICE) as AlarmManager
+
+        manager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            SystemClock.elapsedRealtime() + nextPeriod.toMillis(),
+            pintent)
     }
 
     private fun updateStats(): String {
