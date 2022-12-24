@@ -224,8 +224,8 @@ class HomeActivity : AppCompatActivity() {
         }
 
         val nextPeriodDate = encryption.data.calcNextPeriodDate() ?: return
-        nextPeriodDate.minusDays(1)
-        val nextPeriod = Duration.between(nextPeriodDate, LocalDateTime.now())
+        val dayBefore = nextPeriodDate.minusDays(1)
+        val nextPeriod = Duration.between(LocalDateTime.now(), dayBefore)
 
         this.registerReceiver(AlarmReceiver(), IntentFilter("cross.privateperiodtracker.NEXT_PERIOD_DUE"))
 
