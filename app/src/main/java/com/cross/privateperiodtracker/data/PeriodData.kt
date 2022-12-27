@@ -62,19 +62,19 @@ class PeriodData : Serializable {
     }
 
     private fun rebuildIndex() {
-        index = HashMap();
+        index = HashMap()
 
         for (event in events) {
-            addIndex(event);
+            addIndex(event)
         }
     }
 
     fun getMonthEvents(date: LocalDate): ArrayList<PeriodEvent> {
         val key = MonthYear(date.month, date.year)
         if (index == null || index.size == 0) {
-            rebuildIndex();
+            rebuildIndex()
         }
-        return index.getOrDefault(key, ArrayList());
+        return index.getOrDefault(key, ArrayList())
     }
 
     fun getDayEvents(date: LocalDate): ArrayList<PeriodEvent> {
@@ -100,17 +100,17 @@ class PeriodData : Serializable {
 
     private fun calcStats(minutes: ArrayList<Long>): PeriodStats {
         // Exclude outliers
-        Stats.removeOutliers(minutes);
+        Stats.removeOutliers(minutes)
 
         // Calculate the mean
-        val mean = Stats.mean(minutes);
-        val meanDuration = Duration.ofMinutes(mean.toLong());
+        val mean = Stats.mean(minutes)
+        val meanDuration = Duration.ofMinutes(mean.toLong())
 
         // Calculate the variance
-        val sd = Stats.sd(minutes);
-        val sdDuration = Duration.ofMinutes(sd.toLong());
+        val sd = Stats.sd(minutes)
+        val sdDuration = Duration.ofMinutes(sd.toLong())
 
-        return PeriodStats(meanDuration, sdDuration);
+        return PeriodStats(meanDuration, sdDuration)
     }
 
     fun getState(date_in : LocalDate = LocalDate.now()): CurrentState {
@@ -121,7 +121,7 @@ class PeriodData : Serializable {
         }
         val monthData = getMonthEvents(date)
 
-        var lastIndex = monthData.size - 1;
+        var lastIndex = monthData.size - 1
         while (lastIndex >= 0) {
             val lastEvent = monthData[lastIndex]
             when (lastEvent.type) {
@@ -142,14 +142,14 @@ class PeriodData : Serializable {
                 }
             }
         }
-        return CurrentState.Unknown;
+        return CurrentState.Unknown
     }
 
     fun calcAveragePeriodCycle(): PeriodStats {
         // Calculate the number of periods, and their lengths.
         sort()
-        val periods: ArrayList<Long> = ArrayList();
-        var startTime: LocalDateTime? = null;
+        val periods: ArrayList<Long> = ArrayList()
+        var startTime: LocalDateTime? = null
         for (event in events) {
             when (event.type) {
                 EventType.PeriodStart -> {
@@ -157,17 +157,17 @@ class PeriodData : Serializable {
                         val periodDuration = Duration.between(startTime, event.time).toMinutes()
                         periods.add(periodDuration)
                     }
-                    startTime = event.time;
+                    startTime = event.time
                 }
 
                 EventType.PregnancyStart -> {
                     // Pregnancy will screw up calculations :/
-                    startTime = null;
+                    startTime = null
                 }
 
                 EventType.PregnancyEnd -> {
                     // Pregnancy will screw up calculations :/
-                    startTime = null;
+                    startTime = null
                 }
 
                 else -> {
@@ -179,17 +179,17 @@ class PeriodData : Serializable {
         }
 
         // Calc stats
-        return calcStats(periods);
+        return calcStats(periods)
     }
 
     fun calcAveragePeriodDuration(): PeriodStats {
         // Calculate the duration of the period.
-        val periods: ArrayList<Long> = ArrayList();
-        var startTime: LocalDateTime? = null;
+        val periods: ArrayList<Long> = ArrayList()
+        var startTime: LocalDateTime? = null
         for (event in events) {
             when (event.type) {
                 EventType.PeriodStart -> {
-                    startTime = event.time;
+                    startTime = event.time
                 }
 
                 EventType.PeriodEnd -> {
@@ -201,12 +201,12 @@ class PeriodData : Serializable {
 
                 EventType.PregnancyStart -> {
                     // Pregnancy will screw up calculations :/
-                    startTime = null;
+                    startTime = null
                 }
 
                 EventType.PregnancyEnd -> {
                     // Pregnancy will screw up calculations :/
-                    startTime = null;
+                    startTime = null
                 }
 
                 else -> {
@@ -216,18 +216,18 @@ class PeriodData : Serializable {
         }
 
         // Calc stats
-        return calcStats(periods);
+        return calcStats(periods)
     }
 
     fun calcNextPeriodDate(): LocalDateTime? {
         val ps = calcAveragePeriodCycle()
         if (ps.mean <= Duration.ZERO)
         {
-            return null;
+            return null
         }
-        var lastIndex = events.size - 1;
+        var lastIndex = events.size - 1
         while (lastIndex >= 0) {
-            val lastEvent = events[lastIndex];
+            val lastEvent = events[lastIndex]
             if (lastEvent.type == EventType.PeriodStart) {
                 var nextStart = lastEvent.time + ps.mean
                 while (nextStart < LocalDateTime.now())
@@ -245,13 +245,13 @@ class PeriodData : Serializable {
         val ps = calcAveragePeriodDuration()
         if (ps.mean <= Duration.ZERO)
         {
-            return null;
+            return null
         }
-        var lastIndex = events.size - 1;
+        var lastIndex = events.size - 1
         while (lastIndex >= 0) {
-            val lastEvent = events[lastIndex];
+            val lastEvent = events[lastIndex]
             if (lastEvent.type == EventType.PeriodStart) {
-                return lastEvent.time + ps.mean;
+                return lastEvent.time + ps.mean
             }
             lastIndex -= 1
         }
@@ -259,11 +259,11 @@ class PeriodData : Serializable {
     }
 
     fun getPregnancyStart(): LocalDateTime? {
-        var lastIndex = events.size - 1;
+        var lastIndex = events.size - 1
         while (lastIndex >= 0) {
-            val lastEvent = events[lastIndex];
+            val lastEvent = events[lastIndex]
             if (lastEvent.type == EventType.PregnancyStart) {
-                return lastEvent.time;
+                return lastEvent.time
             }
             lastIndex -= 1
         }
@@ -296,7 +296,7 @@ class PeriodData : Serializable {
     }
 
     fun delete(event: PeriodEvent) {
-        events.remove(event);
+        events.remove(event)
         rebuildIndex()
     }
 }
@@ -311,37 +311,37 @@ fun didForget(): Boolean {
 }
 
 const val S_IN_DAY: Long = 24 * 60 * 60
-const val MAX_GENERATED_DAYS_S: Long = 7 * 365 * S_IN_DAY;
-const val MIN_GENERATED_DAYS_S: Long = 3 * 365 * S_IN_DAY;
+const val MAX_GENERATED_DAYS_S: Long = 7 * 365 * S_IN_DAY
+const val MIN_GENERATED_DAYS_S: Long = 3 * 365 * S_IN_DAY
 
-const val MIN_PERIOD_CYCLE_S: Long = 24 * S_IN_DAY;
-const val MAX_PERIOD_CYCLE_S: Long = 32 * S_IN_DAY;
-const val MIN_PERIOD_DURATION_S: Long = 2 * S_IN_DAY;
-const val MAX_PERIOD_DURATION_S: Long = 5 * S_IN_DAY;
+const val MIN_PERIOD_CYCLE_S: Long = 24 * S_IN_DAY
+const val MAX_PERIOD_CYCLE_S: Long = 32 * S_IN_DAY
+const val MIN_PERIOD_DURATION_S: Long = 2 * S_IN_DAY
+const val MAX_PERIOD_DURATION_S: Long = 5 * S_IN_DAY
 
 fun generateData(): PeriodData {
-    val pd = PeriodData();
+    val pd = PeriodData()
     var startDate =
-        LocalDateTime.now().minusSeconds(randLong(MIN_GENERATED_DAYS_S, MAX_GENERATED_DAYS_S));
+        LocalDateTime.now().minusSeconds(randLong(MIN_GENERATED_DAYS_S, MAX_GENERATED_DAYS_S))
     // Future: Generate tampon events, generate pregnancy events??
     while (startDate < LocalDateTime.now()) {
         val periodDurationLength = randLong(MIN_PERIOD_DURATION_S, MAX_PERIOD_DURATION_S)
         val periodCycleLength = randLong(MIN_PERIOD_CYCLE_S, MAX_PERIOD_CYCLE_S)
 
         if (!didForget()) {
-            pd.addEvent(PeriodEvent(time = startDate, type = EventType.PeriodStart));
+            pd.addEvent(PeriodEvent(time = startDate, type = EventType.PeriodStart))
         }
-        startDate = startDate.plusSeconds(periodDurationLength);
+        startDate = startDate.plusSeconds(periodDurationLength)
         if (startDate > LocalDateTime.now()) {
-            break;
+            break
         }
         if (!didForget()) {
-            pd.addEvent(PeriodEvent(time = startDate, type = EventType.PeriodEnd));
+            pd.addEvent(PeriodEvent(time = startDate, type = EventType.PeriodEnd))
         }
         startDate = startDate.plusSeconds(periodCycleLength - periodDurationLength)
         if (startDate > LocalDateTime.now()) {
-            break;
+            break
         }
     }
-    return pd;
+    return pd
 }

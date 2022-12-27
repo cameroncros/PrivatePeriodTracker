@@ -15,7 +15,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
 
 const val REQUEST_START: Int = 1
-const val CHANNEL_ID: String = "PeriodDue";
+const val CHANNEL_ID: String = "PeriodDue"
 
 class AlarmReceiver : BroadcastReceiver() {
     private fun createNotificationChannel(context: Context) {
@@ -68,6 +68,6 @@ class AlarmReceiver : BroadcastReceiver() {
         {
             return
         }
-        sendNotification(context);
+        sendNotification(context)
     }
 }

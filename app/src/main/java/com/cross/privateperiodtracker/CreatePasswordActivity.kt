@@ -14,26 +14,26 @@ class CreatePasswordActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_password)
 
-        val saveButton: Button = findViewById(R.id.save);
+        val saveButton: Button = findViewById(R.id.save)
         saveButton.setOnClickListener {
-            val passwordText: EditText = findViewById(R.id.realPassword);
+            val passwordText: EditText = findViewById(R.id.realPassword)
             val password = passwordText.text.toString()
-            val canaryText: EditText = findViewById(R.id.duressPassword);
+            val canaryText: EditText = findViewById(R.id.duressPassword)
             val canary = canaryText.text.toString()
 
             Encryption(
                 password,
                 this@CreatePasswordActivity.applicationContext
-            ).saveData();
+            ).saveData()
             if (canary.isNotEmpty()) {
                 val encryption = Encryption(
                     canary,
                     this@CreatePasswordActivity.applicationContext
                 )
-                encryption.data = generateData();
-                encryption.saveData();
+                encryption.data = generateData()
+                encryption.saveData()
             }
-            finish();
+            finish()
         }
     }
 }

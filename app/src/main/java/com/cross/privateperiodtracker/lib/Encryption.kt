@@ -30,7 +30,7 @@ import javax.crypto.spec.SecretKeySpec
 fun generateAESBytes(): ByteArray {
     val bytes = ByteArray(16)
     Random().nextBytes(bytes)
-    return bytes;
+    return bytes
 }
 
 fun keyFromPassword(password: String, salt: ByteArray): SecretKey {
@@ -45,7 +45,7 @@ fun keyFromPassword(password: String, salt: ByteArray): SecretKey {
     val keySpec: KeySpec = PBEKeySpec(
         password.toCharArray(), salt, iterations, outputKeyLength
     )
-    return SecretKeySpec(secretKeyFactory.generateSecret(keySpec).encoded, "AES");
+    return SecretKeySpec(secretKeyFactory.generateSecret(keySpec).encoded, "AES")
 }
 
 fun generateFilename(filesDir: File): File {
@@ -58,7 +58,7 @@ fun listFiles(filesDir: File) = iterator {
     val dir = filesDir.listFiles() ?: return@iterator
     for (file in dir) {
         if (file.isDirectory) {
-            continue;
+            continue
         }
         if (!file.name.startsWith("file_")) {
             continue
@@ -84,14 +84,14 @@ class LocalDateTimeMoshiAdapter {
 }
 
 class Encryption(password: String, context: Context) : Serializable {
-    private val secretKey: SecretKey;
-    private var iv: ByteArray?;
-    private var file: File? = null;
-    var data: PeriodData = PeriodData();
-    private var filesDir: File;
+    private val secretKey: SecretKey
+    private var iv: ByteArray?
+    private var file: File? = null
+    var data: PeriodData = PeriodData()
+    private var filesDir: File
 
     init {
-        val sp = context.getSharedPreferences("main", MODE_PRIVATE);
+        val sp = context.getSharedPreferences("main", MODE_PRIVATE)
 
         val salt: ByteArray
         if (!sp.contains("salt")) {
@@ -100,7 +100,7 @@ class Encryption(password: String, context: Context) : Serializable {
             sp.edit().putString("salt", String(Base64.encode(salt, Base64.DEFAULT))).apply()
         } else {
             val b64salt = sp.getString("salt", null)
-            salt = Base64.decode(b64salt, Base64.DEFAULT);
+            salt = Base64.decode(b64salt, Base64.DEFAULT)
         }
 
         if (!sp.contains("iv")) {
@@ -108,7 +108,7 @@ class Encryption(password: String, context: Context) : Serializable {
             Random().nextBytes(iv)
             sp.edit().putString("iv", String(Base64.encode(iv, Base64.DEFAULT))).apply()
         } else {
-            iv = Base64.decode(sp.getString("iv", null), Base64.DEFAULT);
+            iv = Base64.decode(sp.getString("iv", null), Base64.DEFAULT)
         }
 
         filesDir = context.filesDir
@@ -123,16 +123,16 @@ class Encryption(password: String, context: Context) : Serializable {
 
         val json: String = jsonAdapter.toJson(data)
 
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, IvParameterSpec(iv))
-        val cipherBytes = cipher.doFinal(json.toByteArray());
+        val cipherBytes = cipher.doFinal(json.toByteArray())
 
         if (file == null) {
             file = generateFilename(filesDir)
         }
         val outputStream = FileOutputStream(file)
-        outputStream.write(cipherBytes);
-        outputStream.close();
+        outputStream.write(cipherBytes)
+        outputStream.close()
     }
 
     fun loadData(): PeriodData? {
@@ -150,10 +150,10 @@ class Encryption(password: String, context: Context) : Serializable {
     private fun decryptFile(file: File): PeriodData? {
         try {
             val inputStream = FileInputStream(file)
-            val encryptedData = inputStream.readBytes();
-            inputStream.close();
+            val encryptedData = inputStream.readBytes()
+            inputStream.close()
 
-            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
             cipher.init(Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(iv))
             val decryptedBytes = String(cipher.doFinal(encryptedData))
 

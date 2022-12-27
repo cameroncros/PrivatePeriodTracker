@@ -5,16 +5,16 @@ import kotlin.math.sqrt
 class Stats {
     companion object {
         fun removeOutliers(numbers: ArrayList<Long>) {
-            if (numbers.size == 0) return;
+            if (numbers.size == 0) return
 
             // Sort numbers.
-            numbers.sort();
+            numbers.sort()
 
             // Remove all numbers greater than 1.5 * the mean.
             var cutoff = mean(numbers) * 1.5
             while (numbers[numbers.size - 1] > cutoff)
             {
-                numbers.removeAt(numbers.size - 1);
+                numbers.removeAt(numbers.size - 1)
             }
         }
 

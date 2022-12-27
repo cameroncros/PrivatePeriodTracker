@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter
 
 class EventListAdapter(val deleteEventCallback: (periodEvent: PeriodEvent) -> Unit) :
     RecyclerView.Adapter<EventListAdapter.ViewHolder>() {
-    private var dataSet: ArrayList<PeriodEvent>? = null;
+    private var dataSet: ArrayList<PeriodEvent>? = null
     private var pos: Int = 0
 
     @SuppressLint("NotifyDataSetChanged")
@@ -57,7 +57,7 @@ class EventListAdapter(val deleteEventCallback: (periodEvent: PeriodEvent) -> Un
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         if (dataSet == null)
         {
-            return;
+            return
         }
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
@@ -84,19 +84,19 @@ class EventListAdapter(val deleteEventCallback: (periodEvent: PeriodEvent) -> Un
                 viewHolder.icon.setImageDrawable(getDrawable(viewHolder.context, R.drawable.icon_period_start))
             }
             PeriodEnd  -> {
-                viewHolder.icon.setImageDrawable(getDrawable(viewHolder.context, R.drawable.icon_period_end))
+                viewHolder.icon.setImageDrawable(getDrawable(viewHolder.context, R.drawable.icon_period_stop))
             }
             PregnancyStart -> {
                 viewHolder.icon.setImageDrawable(getDrawable(viewHolder.context, R.drawable.icon_pregnancy_start))
             }
             PregnancyEnd -> {
-                viewHolder.icon.setImageDrawable(getDrawable(viewHolder.context, R.drawable.icon_pregnancy_end))
+                viewHolder.icon.setImageDrawable(getDrawable(viewHolder.context, R.drawable.icon_pregnancy_stop))
             }
             TamponStart -> {
                 viewHolder.icon.setImageDrawable(getDrawable(viewHolder.context, R.drawable.icon_tampon_start))
             }
             TamponEnd -> {
-                viewHolder.icon.setImageDrawable(getDrawable(viewHolder.context, R.drawable.icon_tampon_end))
+                viewHolder.icon.setImageDrawable(getDrawable(viewHolder.context, R.drawable.icon_tampon_stop))
             }
             Painkiller -> {
                 viewHolder.icon.setImageDrawable(getDrawable(viewHolder.context, R.drawable.icon_painkiller))
