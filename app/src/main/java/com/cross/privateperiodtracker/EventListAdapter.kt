@@ -9,15 +9,27 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.recyclerview.widget.RecyclerView
-import com.cross.privateperiodtracker.data.EventType
 import com.cross.privateperiodtracker.data.EventType.*
 import com.cross.privateperiodtracker.data.PeriodEvent
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.format.ResolverStyle
+import java.time.temporal.ChronoField
 
 class EventListAdapter(val deleteEventCallback: (periodEvent: PeriodEvent) -> Unit) :
     RecyclerView.Adapter<EventListAdapter.ViewHolder>() {
     private var dataSet: ArrayList<PeriodEvent>? = null
-    private var pos: Int = 0
+    private val dateFormatter = DateTimeFormatterBuilder()
+        .appendValue(ChronoField.DAY_OF_MONTH)
+        .appendLiteral("/")
+        .appendValue(ChronoField.MONTH_OF_YEAR)
+        .appendLiteral(" ")
+        .appendValue(ChronoField.CLOCK_HOUR_OF_AMPM, 2)
+        .appendLiteral(':')
+        .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+        .appendPattern(" a")
+        .optionalStart()
+        .toFormatter()
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateData(data: ArrayList<PeriodEvent>)
@@ -59,10 +71,11 @@ class EventListAdapter(val deleteEventCallback: (periodEvent: PeriodEvent) -> Un
         {
             return
         }
+
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         val sb = StringBuilder()
-        sb.append(dataSet!![position].time.format(DateTimeFormatter.BASIC_ISO_DATE))
+        sb.append(dataSet!![position].time.format(dateFormatter))
         sb.append(" - ")
         when (dataSet!![position].type) {
             PeriodStart -> sb.append("Period Start")
