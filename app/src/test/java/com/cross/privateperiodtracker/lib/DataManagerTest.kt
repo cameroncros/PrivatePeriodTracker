@@ -5,8 +5,6 @@ import android.content.SharedPreferences
 import android.util.Base64
 import com.cross.privateperiodtracker.data.PeriodData
 import com.cross.privateperiodtracker.data.generateData
-import org.hamcrest.CoreMatchers.not
-import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -18,12 +16,17 @@ import org.mockito.Mockito
 import java.io.File
 import java.nio.charset.Charset
 import java.util.Random
-import kotlin.math.abs
 
 
-class EncryptionTest {
+class DataManagerTest {
 
     private lateinit var context: Context
+
+    private fun generateAESBytes(): ByteArray {
+        val bytes = ByteArray(16)
+        Random().nextBytes(bytes)
+        return bytes
+    }
 
     @Before
     fun setUp() {
@@ -44,38 +47,30 @@ class EncryptionTest {
         Mockito.`when`(sharedPrefs.getString("iv", null))
             .thenReturn(b64iv)
 
-        listFiles(context).forEach { file -> file.delete() }
+        listFiles(File(".")).forEach { file -> file.delete() }
     }
 
     @After
     fun tearDown() {
-        listFiles(context).forEach { file -> file.delete() }
-    }
-
-    @Test
-    fun keyIsConsistent() {
-        val salt = generateAESBytes()
-        val key1 = keyFromPassword("abc123", salt)
-        val key2 = keyFromPassword("abc123", salt)
-        val key3 = keyFromPassword("notmatch", salt)
-
-        assertEquals(key1, key2)
-        assertThat(key1, not(key3))
+        listFiles(File(".")).forEach { file -> file.delete() }
     }
 
     @Test
     fun saveDataAndLoadDataTest() {
-        val array = ByteArray(abs(Random().nextInt() % 100))
+        val array = ByteArray(kotlin.math.abs(Random().nextInt() % 100) + 16)
 
         Random().nextBytes(array)
-        val generatedString = String(array, Charset.forName("UTF-8"))
+        val password = String(array, Charset.forName("UTF-8"))
 
         val data: PeriodData = generateData()
 
-        val encryption = Encryption(generatedString, context)
-        encryption.saveData(data)
 
-        val data2: PeriodData? = encryption.loadData()
+        val mockEncryptor = Encryptor(password, context, keyHasher = MockHasher())
+        val dataManager = DataManager(context, mockEncryptor)
+        dataManager.data = data
+        dataManager.saveData()
+
+        val data2: PeriodData? = dataManager.loadData()
 
         assertNotNull(data2)
         assertEquals(data, data2)

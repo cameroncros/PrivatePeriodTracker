@@ -1,14 +1,13 @@
 package com.cross.privateperiodtracker
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.core.os.bundleOf
-import com.cross.privateperiodtracker.data.PeriodData
-import com.cross.privateperiodtracker.lib.Encryption
+import androidx.appcompat.app.AppCompatActivity
+import com.cross.privateperiodtracker.lib.DataManager
+import com.cross.privateperiodtracker.lib.Encryptor
 
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,15 +20,20 @@ class LoginActivity : AppCompatActivity() {
             val password = passwordText.text.toString()
             passwordText.setText("")
 
-            val enc = Encryption(password, applicationContext)
-            if (enc.loadData() == null)
-            {
-                Toast.makeText(this, resources.getString(R.string.wrong_password), Toast.LENGTH_SHORT).show()
+            val encryptor = Encryptor(password, applicationContext)
+
+            val dm = DataManager(applicationContext, encryptor)
+            if (dm.loadData() == null) {
+                Toast.makeText(
+                    this,
+                    resources.getString(R.string.wrong_password),
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
             val k = Intent(this, HomeActivity::class.java)
-            k.putExtra(dataKey, enc)
+            k.putExtra(dataKey, dm)
             startActivity(k)
         }
     }

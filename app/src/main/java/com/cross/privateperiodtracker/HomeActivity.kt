@@ -20,7 +20,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.app.ActivityCompat
 import androidx.core.view.children
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,7 +28,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cross.privateperiodtracker.data.CurrentState
 import com.cross.privateperiodtracker.data.EventType
 import com.cross.privateperiodtracker.data.PeriodEvent
-import com.cross.privateperiodtracker.lib.Encryption
+import com.cross.privateperiodtracker.lib.DataManager
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.daysOfWeek
@@ -43,14 +43,13 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
-import androidx.appcompat.content.res.AppCompatResources.getDrawable
 
 
 const val dataKey: String = "data"
 const val eventKey: String = "event"
 
 class HomeActivity : AppCompatActivity() {
-    private lateinit var encryption: Encryption
+    private lateinit var dataManager: DataManager
     private lateinit var status: TextView
     private lateinit var stats: TextView
     private lateinit var calendarView: com.kizitonwose.calendar.view.CalendarView
@@ -58,7 +57,7 @@ class HomeActivity : AppCompatActivity() {
     private var selectedDay: LocalDate? = null
 
     fun update() {
-        val periodData = encryption.data
+        val periodData = dataManager.data
         status.text = updateStatus()
         stats.text = updateStats()
 
@@ -92,31 +91,66 @@ class HomeActivity : AppCompatActivity() {
                         container.icon.visibility = View.VISIBLE
                         when (events[0].type) {
                             EventType.PeriodStart -> {
-                                container.icon.setImageDrawable(getDrawable(container.view.context, R.drawable.icon_period_start))
+                                container.icon.setImageDrawable(
+                                    getDrawable(
+                                        container.view.context,
+                                        R.drawable.icon_period_start
+                                    )
+                                )
                             }
 
                             EventType.PeriodEnd -> {
-                                container.icon.setImageDrawable(getDrawable(container.view.context, R.drawable.icon_period_stop))
+                                container.icon.setImageDrawable(
+                                    getDrawable(
+                                        container.view.context,
+                                        R.drawable.icon_period_stop
+                                    )
+                                )
                             }
 
                             EventType.PregnancyStart -> {
-                                container.icon.setImageDrawable(getDrawable(container.view.context, R.drawable.icon_pregnancy_start))
+                                container.icon.setImageDrawable(
+                                    getDrawable(
+                                        container.view.context,
+                                        R.drawable.icon_pregnancy_start
+                                    )
+                                )
                             }
 
                             EventType.PregnancyEnd -> {
-                                container.icon.setImageDrawable(getDrawable(container.view.context, R.drawable.icon_pregnancy_stop))
+                                container.icon.setImageDrawable(
+                                    getDrawable(
+                                        container.view.context,
+                                        R.drawable.icon_pregnancy_stop
+                                    )
+                                )
                             }
 
                             EventType.TamponStart -> {
-                                container.icon.setImageDrawable(getDrawable(container.view.context, R.drawable.icon_tampon_start))
+                                container.icon.setImageDrawable(
+                                    getDrawable(
+                                        container.view.context,
+                                        R.drawable.icon_tampon_start
+                                    )
+                                )
                             }
 
                             EventType.TamponEnd -> {
-                                container.icon.setImageDrawable(getDrawable(container.view.context, R.drawable.icon_tampon_stop))
+                                container.icon.setImageDrawable(
+                                    getDrawable(
+                                        container.view.context,
+                                        R.drawable.icon_tampon_stop
+                                    )
+                                )
                             }
 
                             EventType.Painkiller -> {
-                                container.icon.setImageDrawable(getDrawable(container.view.context, R.drawable.icon_painkiller))
+                                container.icon.setImageDrawable(
+                                    getDrawable(
+                                        container.view.context,
+                                        R.drawable.icon_painkiller
+                                    )
+                                )
                             }
                         }
                     } else {
@@ -173,7 +207,7 @@ class HomeActivity : AppCompatActivity() {
 
     fun updateEventList(day: LocalDate) {
         selectedDay = day
-        (eventList.adapter as EventListAdapter).updateData(encryption.data.getDayEvents(day))
+        (eventList.adapter as EventListAdapter).updateData(dataManager.data.getDayEvents(day))
         eventList.invalidate()
     }
 
@@ -185,7 +219,7 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home_activity)
 
-        encryption = intent.getSerializableExtra(dataKey) as Encryption
+        dataManager = intent.getSerializableExtra(dataKey) as DataManager
 
         status = findViewById(R.id.currentStatus)
         stats = findViewById(R.id.currentStats)
@@ -199,8 +233,8 @@ class HomeActivity : AppCompatActivity() {
                 if (result.resultCode == Activity.RESULT_OK) {
                     val event: PeriodEvent =
                         result.data?.getSerializableExtra(eventKey) as PeriodEvent
-                    encryption.data.addEvent(event)
-                    encryption.saveData()
+                    dataManager.data.addEvent(event)
+                    dataManager.saveData()
                     update()
                 }
             }
@@ -215,8 +249,8 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun deleteEventCallback(event: PeriodEvent) {
-        encryption.data.delete(event)
-        encryption.saveData()
+        dataManager.data.delete(event)
+        dataManager.saveData()
 
         selectedDay?.let { updateEventList(it) }
         update()
@@ -236,7 +270,7 @@ class HomeActivity : AppCompatActivity() {
             )
         }
 
-        val nextPeriodDate = encryption.data.calcNextPeriodDate() ?: return
+        val nextPeriodDate = dataManager.data.calcNextPeriodDate() ?: return
         val dayBefore = nextPeriodDate.minusDays(1)
         val nextPeriod = Duration.between(LocalDateTime.now(), dayBefore)
 
@@ -261,8 +295,8 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun updateStats(): String {
-        val cycleStats = encryption.data.calcAveragePeriodCycle()
-        val durationStats = encryption.data.calcAveragePeriodDuration()
+        val cycleStats = dataManager.data.calcAveragePeriodCycle()
+        val durationStats = dataManager.data.calcAveragePeriodDuration()
         val sb = StringBuilder()
         sb.append(resources.getString(R.string.your_cycle_is_))
         sb.append(cycleStats.mean.toDays())
@@ -283,9 +317,9 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun updateStatus(): String {
-        when (encryption.data.getState()) {
+        when (dataManager.data.getState()) {
             CurrentState.Period -> {
-                val endDate = encryption.data.calcEndOfPeriodDate()
+                val endDate = dataManager.data.calcEndOfPeriodDate()
                     ?: return resources.getString(R.string.need_more_data)
                 val delta = Duration.between(LocalDateTime.now(), endDate)
                 val sb = StringBuilder()
@@ -296,7 +330,7 @@ class HomeActivity : AppCompatActivity() {
             }
 
             CurrentState.Freedom -> {
-                val endDate = encryption.data.calcNextPeriodDate()
+                val endDate = dataManager.data.calcNextPeriodDate()
                     ?: return resources.getString(R.string.need_more_data)
                 val delta = Duration.between(LocalDateTime.now(), endDate)
                 val sb = StringBuilder()
@@ -307,7 +341,7 @@ class HomeActivity : AppCompatActivity() {
             }
 
             CurrentState.Pregnant -> {
-                val startDate = encryption.data.getPregnancyStart()
+                val startDate = dataManager.data.getPregnancyStart()
                     ?: return resources.getString(R.string.need_more_data)
                 val delta = Duration.between(startDate, LocalDateTime.now())
                 val sb = StringBuilder()

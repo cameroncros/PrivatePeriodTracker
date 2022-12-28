@@ -91,9 +91,11 @@ class PeriodDataTest {
     @Test
     fun calcNextPeriodDateTest_Valid() {
         val pd = PeriodData()
+        pd.addEvent(PeriodEvent(LocalDateTime.now().minusDays(30), EventType.PeriodStart))
+        pd.addEvent(PeriodEvent(LocalDateTime.now().minusDays(25), EventType.PeriodEnd))
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodStart))
         for (i in 0..3) {
-            pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodEnd))
+            pd.addEvent(PeriodEvent(LocalDateTime.now() + Duration.ofDays(3), EventType.PeriodEnd))
             assertNotNull(pd.calcNextPeriodDate())
         }
     }

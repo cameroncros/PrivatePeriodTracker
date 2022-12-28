@@ -4,9 +4,9 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
-import com.cross.privateperiodtracker.data.PeriodData
 import com.cross.privateperiodtracker.data.generateData
-import com.cross.privateperiodtracker.lib.Encryption
+import com.cross.privateperiodtracker.lib.DataManager
+import com.cross.privateperiodtracker.lib.Encryptor
 
 
 class CreatePasswordActivity : AppCompatActivity() {
@@ -21,17 +21,26 @@ class CreatePasswordActivity : AppCompatActivity() {
             val canaryText: EditText = findViewById(R.id.duressPassword)
             val canary = canaryText.text.toString()
 
-            Encryption(
+            val encryptor = Encryptor(
                 password,
                 this@CreatePasswordActivity.applicationContext
+            )
+            DataManager(
+                this@CreatePasswordActivity.applicationContext,
+                encryptor
             ).saveData()
+
             if (canary.isNotEmpty()) {
-                val encryption = Encryption(
+                val canaryEncryptor = Encryptor(
                     canary,
                     this@CreatePasswordActivity.applicationContext
                 )
-                encryption.data = generateData()
-                encryption.saveData()
+                val dataManager = DataManager(
+                    this@CreatePasswordActivity.applicationContext,
+                    canaryEncryptor
+                )
+                dataManager.data = generateData()
+                dataManager.saveData()
             }
             finish()
         }
