@@ -1,31 +1,34 @@
 package com.cross.privateperiodtracker.lib
 
+import android.R.attr
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.util.Base64
 import com.cross.privateperiodtracker.data.PeriodData
 import com.cross.privateperiodtracker.data.PeriodEvent
-import com.cross.privateperiodtracker.data.generateData
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
+import org.signal.argon2.Argon2
+import org.signal.argon2.MemoryCost
+import org.signal.argon2.Type
+import org.signal.argon2.Version
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.OutputStream
 import java.io.Serializable
 import java.security.spec.KeySpec
 import java.time.LocalDateTime
 import java.util.Random
 import java.util.UUID
-import javax.crypto.BadPaddingException
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
+
 
 fun generateAESBytes(): ByteArray {
     val bytes = ByteArray(16)
@@ -34,18 +37,15 @@ fun generateAESBytes(): ByteArray {
 }
 
 fun keyFromPassword(password: String, salt: ByteArray): SecretKey {
-    // Number of PBKDF2 hardening rounds to use. Larger values increase
-    // computation time. You should select a value that causes computation
-    // to take >100ms.
-    val iterations = 1000
+    val argon2 = Argon2.Builder(Version.V13)
+        .type(Type.Argon2id)
+        .memoryCost(MemoryCost.MiB(32))
+        .parallelism(1)
+        .iterations(3)
+        .build()
 
-    // Generate a 128-bit key
-    val outputKeyLength = 128
-    val secretKeyFactory: SecretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
-    val keySpec: KeySpec = PBEKeySpec(
-        password.toCharArray(), salt, iterations, outputKeyLength
-    )
-    return SecretKeySpec(secretKeyFactory.generateSecret(keySpec).encoded, "AES")
+    val result = argon2.hash(password.toByteArray(), salt)
+    return SecretKeySpec(result.hash, 0, result.hash.size, "AES")
 }
 
 fun generateFilename(filesDir: File): File {

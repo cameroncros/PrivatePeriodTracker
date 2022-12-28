@@ -58,6 +58,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
     implementation 'com.kizitonwose.calendar:view:2.0.4'
     implementation 'com.squareup.moshi:moshi:1.14.0'
+    implementation 'org.signal:argon2:13.1@aar'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.hamcrest:hamcrest-library:2.2'
     testImplementation 'org.mockito:mockito-core:4.9.0'
