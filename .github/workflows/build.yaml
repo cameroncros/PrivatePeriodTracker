@@ -1,0 +1,24 @@
+name: Build
+on:
+  pull_request:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+      - name: Build the app
+        run: ./gradlew build
+      - name: Run tests
+        run: ./gradlew test
+      - name: Run connected tests
+        uses: ReactiveCircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          script: ./gradlew connectedCheck
