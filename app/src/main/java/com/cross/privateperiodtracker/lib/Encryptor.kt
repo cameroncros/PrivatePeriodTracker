@@ -8,6 +8,10 @@ import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 
+const val FORMAT = "AES/CBC/PKCS5Padding"
+
+class FailedDecryption : Exception()
+
 class Encryptor(password: String, context: Context, keyHasher: KeyHasher = ArgonHasher()) :
     Serializable {
     private val secretKey: SecretKey
@@ -38,14 +42,18 @@ class Encryptor(password: String, context: Context, keyHasher: KeyHasher = Argon
     }
 
     fun encrypt(input: ByteArray): ByteArray {
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        val cipher = Cipher.getInstance(FORMAT)
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, IvParameterSpec(iv))
         return cipher.doFinal(input)
     }
 
     fun decrypt(input: ByteArray): ByteArray {
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        cipher.init(Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(iv))
-        return cipher.doFinal(input)
+        try {
+            val cipher = Cipher.getInstance(FORMAT)
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(iv))
+            return cipher.doFinal(input)
+        } catch (e: Exception) {
+            throw FailedDecryption()
+        }
     }
 }
