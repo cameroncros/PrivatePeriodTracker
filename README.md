@@ -8,5 +8,6 @@ This app is a period tracker with a strong focus on privacy and security.
   which will show completely randomised data.
   The randomised data can be interacted with as if it were real, and there is no way to tell the
   difference.
-- All data is encrypted with AES-CBC, with PKCS5 Padding.
+- All data is encrypted with AES-GCM, with 256bit keys.
 - Encryption keys are generated from the password using Argon2 (Signal Foundation library)
+- IV's and Salts are generated each time a file is saved.

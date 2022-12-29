@@ -20,7 +20,7 @@ class LoginActivity : AppCompatActivity() {
             val password = passwordText.text.toString()
             passwordText.setText("")
 
-            val encryptor = Encryptor(password, applicationContext)
+            val encryptor = Encryptor(password)
 
             val dm = DataManager(applicationContext, encryptor)
             if (dm.loadData() == null) {

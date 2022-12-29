@@ -65,7 +65,7 @@ class DataManagerTest {
         val data: PeriodData = generateData()
 
 
-        val mockEncryptor = Encryptor(password, context, keyHasher = MockHasher())
+        val mockEncryptor = Encryptor(password, keyHasher = MockHasher())
         val dataManager = DataManager(context, mockEncryptor)
         dataManager.data = data
         dataManager.saveData()

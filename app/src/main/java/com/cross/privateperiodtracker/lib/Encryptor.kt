@@ -1,57 +1,48 @@
 package com.cross.privateperiodtracker.lib
 
-import android.content.Context
-import android.util.Base64
 import java.io.Serializable
-import java.util.Random
+import java.security.SecureRandom
 import javax.crypto.Cipher
-import javax.crypto.SecretKey
-import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.GCMParameterSpec
 
-const val FORMAT = "AES/CBC/PKCS5Padding"
+const val FORMAT = "AES/GCM/NoPadding"
+const val IV_LENGTH = 12
+const val AAD_LENGTH = 16
+const val TAG_LENGTH = 16
+const val SALT_LENGTH = 16
 
 class FailedDecryption : Exception()
 
-class Encryptor(password: String, context: Context, keyHasher: KeyHasher = ArgonHasher()) :
+class Encryptor(private val password: String, private val keyHasher: KeyHasher = ArgonHasher()) :
     Serializable {
-    private val secretKey: SecretKey
-    private var iv: ByteArray?
-    private var salt: ByteArray
-
-    init {
-        val sp = context.getSharedPreferences("main", Context.MODE_PRIVATE)
-
-        if (!sp.contains("salt")) {
-            salt = ByteArray(16)
-            Random().nextBytes(salt)
-            sp.edit().putString("salt", String(Base64.encode(salt, Base64.DEFAULT))).apply()
-        } else {
-            val b64salt = sp.getString("salt", null)
-            salt = Base64.decode(b64salt, Base64.DEFAULT)
-        }
-
-        if (!sp.contains("iv")) {
-            iv = ByteArray(16)
-            Random().nextBytes(iv)
-            sp.edit().putString("iv", String(Base64.encode(iv, Base64.DEFAULT))).apply()
-        } else {
-            iv = Base64.decode(sp.getString("iv", null), Base64.DEFAULT)
-        }
-
-        secretKey = keyHasher.keyFromPassword(password, salt)
-    }
 
     fun encrypt(input: ByteArray): ByteArray {
+        val salt = SecureRandom().generateSeed(SALT_LENGTH)
+        val iv = SecureRandom().generateSeed(IV_LENGTH)
+        val key = keyHasher.keyFromPassword(password, salt)
         val cipher = Cipher.getInstance(FORMAT)
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey, IvParameterSpec(iv))
-        return cipher.doFinal(input)
+        cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(TAG_LENGTH * 8, iv))
+        val aad = SecureRandom().generateSeed(AAD_LENGTH)
+        cipher.updateAAD(aad)
+        val ciphertext = cipher.doFinal(input)
+        return salt + iv + aad + ciphertext
     }
 
     fun decrypt(input: ByteArray): ByteArray {
         try {
+            val salt = input.sliceArray(0 until SALT_LENGTH)
+            val iv = input.sliceArray(SALT_LENGTH until SALT_LENGTH + IV_LENGTH)
+            val aad =
+                input.sliceArray(SALT_LENGTH + IV_LENGTH until SALT_LENGTH + IV_LENGTH + AAD_LENGTH)
+            val ciphertext = input.sliceArray(SALT_LENGTH + IV_LENGTH + AAD_LENGTH until input.size)
+
+            val key = keyHasher.keyFromPassword(password, salt)
+
             val cipher = Cipher.getInstance(FORMAT)
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(iv))
-            return cipher.doFinal(input)
+            val spec = GCMParameterSpec(TAG_LENGTH * 8, iv)
+            cipher.init(Cipher.DECRYPT_MODE, key, spec)
+            cipher.updateAAD(aad)
+            return cipher.doFinal(ciphertext)
         } catch (e: Exception) {
             throw FailedDecryption()
         }

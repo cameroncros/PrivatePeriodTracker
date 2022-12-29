@@ -21,20 +21,14 @@ class CreatePasswordActivity : AppCompatActivity() {
             val canaryText: EditText = findViewById(R.id.duressPassword)
             val canary = canaryText.text.toString()
 
-            val encryptor = Encryptor(
-                password,
-                this@CreatePasswordActivity.applicationContext
-            )
+            val encryptor = Encryptor(password)
             DataManager(
                 this@CreatePasswordActivity.applicationContext,
                 encryptor
             ).saveData()
 
             if (canary.isNotEmpty()) {
-                val canaryEncryptor = Encryptor(
-                    canary,
-                    this@CreatePasswordActivity.applicationContext
-                )
+                val canaryEncryptor = Encryptor(canary)
                 val dataManager = DataManager(
                     this@CreatePasswordActivity.applicationContext,
                     canaryEncryptor
