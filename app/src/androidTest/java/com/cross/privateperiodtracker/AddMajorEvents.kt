@@ -1,6 +1,7 @@
 package com.cross.privateperiodtracker
 
 
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import androidx.test.core.app.ActivityScenario
@@ -19,7 +20,6 @@ import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.TypeSafeMatcher
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -32,15 +32,13 @@ class AddMajorEvents {
         listFiles(files).forEach { file -> file.delete() }
     }
 
-    @Rule
-    @JvmField
-    var mGrantPermissionRule =
-        GrantPermissionRule.grant(
-            "android.permission.POST_NOTIFICATIONS"
-        )
-
     @Test
     fun addMajorEvents() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            GrantPermissionRule.grant(
+                "android.permission.POST_NOTIFICATIONS"
+            )
+        }
         ActivityScenario.launch(EntryActivity::class.java)
         val appCompatEditText = onView(
             allOf(

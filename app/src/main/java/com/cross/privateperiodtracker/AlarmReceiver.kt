@@ -33,22 +33,25 @@ class AlarmReceiver : BroadcastReceiver() {
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun sendNotification(context: Context)
-    {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-            != PackageManager.PERMISSION_GRANTED)
-        {
-            return
+    private fun sendNotification(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                return
+            }
         }
         createNotificationChannel(context)
 
         val startAppIntent = Intent(context, EntryActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(context,
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(
+            context,
             0,
             startAppIntent,
-            PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.FLAG_IMMUTABLE
+        )
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.icon_period_start)
@@ -64,8 +67,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (context == null)
-        {
+        if (context == null) {
             return
         }
         sendNotification(context)

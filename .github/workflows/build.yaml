@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        api-level: [ 26 ]
+        api-level: [ 26, 27, 28, 29 ]
     steps:
       - name: Setup Java
         uses: actions/setup-java@v3.9.0
