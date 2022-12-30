@@ -6,19 +6,48 @@ on:
       - '**'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        api-level: [ 26 ]
     steps:
-      - name: Checkout the code
-        uses: actions/checkout@v2
-      - name: Build the app
-        run: ./gradlew build
-      - name: Run tests
-        run: ./gradlew test
-      - name: Run connected tests
-        uses: ReactiveCircus/android-emulator-runner@v2
+      - name: Setup Java
+        uses: actions/setup-java@v3.9.0
         with:
-          api-level: 30
-          target: google_apis
-          arch: x86_64
+          distribution: 'adopt'
+          java-version: '11'
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
+
+      - name: AVD cache
+        uses: actions/cache@v3
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}
+
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
           script: ./gradlew connectedCheck
