@@ -10,6 +10,8 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.SystemClock
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -17,6 +19,7 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -54,6 +57,7 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var stats: TextView
     private lateinit var calendarView: com.kizitonwose.calendar.view.CalendarView
     private lateinit var eventList: RecyclerView
+    private lateinit var menuButton: ImageView
     private var selectedDay: LocalDate? = null
 
     fun update() {
@@ -227,6 +231,25 @@ class HomeActivity : AppCompatActivity() {
         eventList = findViewById(R.id.eventList)
         eventList.layoutManager = LinearLayoutManager(this)
         eventList.adapter = EventListAdapter(::deleteEventCallback)
+        menuButton = findViewById(R.id.menuButton)
+
+        menuButton.setOnClickListener {
+            val popup = PopupMenu(this, menuButton)
+            val inflater: MenuInflater = popup.menuInflater
+            inflater.inflate(R.menu.main_menu, popup.menu)
+            popup.setOnMenuItemClickListener { item: MenuItem? ->
+
+                when (item!!.itemId) {
+                    R.id.settings -> {
+                        val k = Intent(this, HomeActivity::class.java)
+                        startActivity(k)
+                    }
+                }
+
+                return@setOnMenuItemClickListener true
+            }
+            popup.show()
+        }
 
         val intentLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->

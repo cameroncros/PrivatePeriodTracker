@@ -45,4 +45,5 @@
     <string name="need_more_data">Need more data</string>
     <string name="list_events">List Events</string>
     <string name="tbd">TBD</string>
+    <string name="settings">Settings</string>
 </resources>
