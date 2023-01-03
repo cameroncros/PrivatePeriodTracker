@@ -17,34 +17,38 @@
         android:theme="@style/Theme.PrivatePeriodTracker"
         tools:targetApi="31">
         <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_settings" />
+        <activity
             android:name=".HomeActivity"
             android:exported="false"
             android:label="@string/title_activity_home"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.PrivatePeriodTracker" />
+            android:theme="@style/Theme.PrivatePeriodTracker"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".AddEventActivity"
             android:exported="false"
             android:label="@string/title_activity_add_event"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.PrivatePeriodTracker" />
+            android:theme="@style/Theme.PrivatePeriodTracker"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".LoginActivity"
             android:exported="false"
             android:label="@string/title_activity_create_password"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.PrivatePeriodTracker" />
+            android:theme="@style/Theme.PrivatePeriodTracker"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".CreatePasswordActivity"
             android:exported="false"
             android:label="@string/title_activity_create_password"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.PrivatePeriodTracker" />
+            android:theme="@style/Theme.PrivatePeriodTracker"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".EntryActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.PrivatePeriodTracker">
+            android:theme="@style/Theme.PrivatePeriodTracker"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

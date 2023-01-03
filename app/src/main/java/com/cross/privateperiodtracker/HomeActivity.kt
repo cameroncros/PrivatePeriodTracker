@@ -8,6 +8,7 @@ import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.MenuInflater
@@ -241,7 +242,7 @@ class HomeActivity : AppCompatActivity() {
 
                 when (item!!.itemId) {
                     R.id.settings -> {
-                        val k = Intent(this, HomeActivity::class.java)
+                        val k = Intent(this, SettingsActivity::class.java)
                         startActivity(k)
                     }
                 }
@@ -281,40 +282,54 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun updateNotifications() {
-        if (ActivityCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                0
-            )
+        val prefs = getPreferences(MODE_PRIVATE)
+        if (!prefs.getBoolean("enabled", true)) {
+            return
         }
 
-        val nextPeriodDate = dataManager.data.calcNextPeriodDate() ?: return
-        val dayBefore = nextPeriodDate.minusDays(1)
-        val nextPeriod = Duration.between(LocalDateTime.now(), dayBefore)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(
+                    applicationContext,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    0
+                )
+            }
+        }
 
         this.registerReceiver(
             AlarmReceiver(),
             IntentFilter("cross.privateperiodtracker.NEXT_PERIOD_DUE")
         )
-
-        val pintent = PendingIntent.getBroadcast(
-            this,
-            0,
-            Intent("cross.privateperiodtracker.NEXT_PERIOD_DUE"),
-            FLAG_IMMUTABLE
-        )
         val manager = this.getSystemService(ALARM_SERVICE) as AlarmManager
 
-        manager.setExactAndAllowWhileIdle(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            SystemClock.elapsedRealtime() + nextPeriod.toMillis(),
-            pintent
-        )
+        val nextPeriodDate = dataManager.data.calcNextPeriodDate() ?: return
+
+        for (day in 0..8) {
+            val alarmTime = nextPeriodDate.minusDays(day.toLong())
+            val nextPeriod = Duration.between(LocalDateTime.now(), alarmTime)
+
+            val pintent = PendingIntent.getBroadcast(
+                this,
+                day,
+                Intent("cross.privateperiodtracker.NEXT_PERIOD_DUE"),
+                FLAG_IMMUTABLE
+            )
+            manager.cancel(pintent)
+
+            val prefKey = day.toString() + "days"
+            if (prefs.getBoolean(prefKey, false)) {
+                manager.setExactAndAllowWhileIdle(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + nextPeriod.toMillis(),
+                    pintent
+                )
+            }
+        }
     }
 
     private fun updateStats(): String {
