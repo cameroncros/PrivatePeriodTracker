@@ -225,6 +225,7 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home_activity)
 
+        @Suppress("DEPRECATION")
         dataManager = intent.getSerializableExtra(dataKey) as DataManager
 
         status = findViewById(R.id.currentStatus)
@@ -256,7 +257,7 @@ class HomeActivity : AppCompatActivity() {
         val intentLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
-                    val event: PeriodEvent =
+                    @Suppress("DEPRECATION") val event: PeriodEvent =
                         result.data?.getSerializableExtra(eventKey) as PeriodEvent
                     dataManager.data.addEvent(event)
                     dataManager.saveData()

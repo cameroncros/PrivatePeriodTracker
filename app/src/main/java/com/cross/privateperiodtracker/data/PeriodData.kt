@@ -71,6 +71,7 @@ class PeriodData : Serializable {
 
     fun getMonthEvents(date: LocalDate): ArrayList<PeriodEvent> {
         val key = MonthYear(date.month, date.year)
+        @Suppress("SENSELESS_COMPARISON")
         if (index == null || index.size == 0) {
             rebuildIndex()
         }
