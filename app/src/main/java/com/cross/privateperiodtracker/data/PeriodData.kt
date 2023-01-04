@@ -119,8 +119,14 @@ class PeriodData : Serializable {
         if (date != null) {
             date = date_in
         }
-        val monthData = getMonthEvents(date)
-
+        var monthData = getMonthEvents(date)
+        repeat(3)
+        {
+            if (monthData.size == 0) {
+                date = date.minusMonths(1)
+                monthData = getMonthEvents(date)
+            }
+        }
         var lastIndex = monthData.size - 1
         while (lastIndex >= 0) {
             val lastEvent = monthData[lastIndex]

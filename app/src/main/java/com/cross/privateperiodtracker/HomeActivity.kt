@@ -365,8 +365,12 @@ class HomeActivity : AppCompatActivity() {
     private fun updateStatus(): String {
         when (dataManager.data.getState()) {
             CurrentState.Period -> {
-                val endDate = dataManager.data.calcEndOfPeriodDate()
+                var endDate = dataManager.data.calcEndOfPeriodDate()
                     ?: return resources.getString(R.string.need_more_data)
+                val cycle = dataManager.data.calcAveragePeriodCycle()
+                while (endDate < LocalDateTime.now()) {
+                    endDate += cycle.mean
+                }
                 val delta = Duration.between(LocalDateTime.now(), endDate)
                 val sb = StringBuilder()
                 sb.append(resources.getString(R.string.period_will_end_in_))
