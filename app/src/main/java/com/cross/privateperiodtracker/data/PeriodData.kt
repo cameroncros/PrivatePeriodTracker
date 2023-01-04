@@ -89,7 +89,7 @@ class PeriodData : Serializable {
     }
 
     fun sort() {
-        events.sortedWith(compareBy { it.time })
+        events.sortBy { it.time }
     }
 
     fun addEvent(event: PeriodEvent) {
@@ -113,10 +113,9 @@ class PeriodData : Serializable {
         return PeriodStats(meanDuration, sdDuration)
     }
 
-    fun getState(date_in : LocalDate = LocalDate.now()): CurrentState {
+    fun getState(date_in: LocalDate = LocalDate.now()): CurrentState {
         var date = LocalDate.now()
-        if (date != null)
-        {
+        if (date != null) {
             date = date_in
         }
         val monthData = getMonthEvents(date)
@@ -150,7 +149,9 @@ class PeriodData : Serializable {
         sort()
         val periods: ArrayList<Long> = ArrayList()
         var startTime: LocalDateTime? = null
-        for (event in events) {
+        val eventsIterator = events.iterator()
+        while (eventsIterator.hasNext()) {
+            val event = eventsIterator.next()
             when (event.type) {
                 EventType.PeriodStart -> {
                     if (startTime != null) {
@@ -221,8 +222,7 @@ class PeriodData : Serializable {
 
     fun calcNextPeriodDate(): LocalDateTime? {
         val ps = calcAveragePeriodCycle()
-        if (ps.mean <= Duration.ZERO)
-        {
+        if (ps.mean <= Duration.ZERO) {
             return null
         }
         var lastIndex = events.size - 1
@@ -230,8 +230,7 @@ class PeriodData : Serializable {
             val lastEvent = events[lastIndex]
             if (lastEvent.type == EventType.PeriodStart) {
                 var nextStart = lastEvent.time + ps.mean
-                while (nextStart < LocalDateTime.now())
-                {
+                while (nextStart < LocalDateTime.now()) {
                     nextStart += ps.mean
                 }
                 return nextStart
@@ -243,8 +242,7 @@ class PeriodData : Serializable {
 
     fun calcEndOfPeriodDate(): LocalDateTime? {
         val ps = calcAveragePeriodDuration()
-        if (ps.mean <= Duration.ZERO)
-        {
+        if (ps.mean <= Duration.ZERO) {
             return null
         }
         var lastIndex = events.size - 1

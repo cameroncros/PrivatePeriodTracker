@@ -27,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.app.ActivityCompat
 import androidx.core.view.children
+import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cross.privateperiodtracker.data.CurrentState
@@ -282,7 +283,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun updateNotifications() {
-        val prefs = getPreferences(MODE_PRIVATE)
+        val prefs = getDefaultSharedPreferences(applicationContext)
         if (!prefs.getBoolean("enabled", true)) {
             return
         }
@@ -309,14 +310,20 @@ class HomeActivity : AppCompatActivity() {
 
         val nextPeriodDate = dataManager.data.calcNextPeriodDate() ?: return
 
-        for (day in 0..8) {
+        for (day in 0..7) {
             val alarmTime = nextPeriodDate.minusDays(day.toLong())
+            if (alarmTime < LocalDateTime.now()) {
+                continue
+            }
+
             val nextPeriod = Duration.between(LocalDateTime.now(), alarmTime)
 
+            val intent = Intent("cross.privateperiodtracker.NEXT_PERIOD_DUE")
+            intent.putExtra(DAYKEY, day)
             val pintent = PendingIntent.getBroadcast(
                 this,
                 day,
-                Intent("cross.privateperiodtracker.NEXT_PERIOD_DUE"),
+                intent,
                 FLAG_IMMUTABLE
             )
             manager.cancel(pintent)

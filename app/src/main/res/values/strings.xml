@@ -47,4 +47,8 @@
     <string name="tbd">TBD</string>
     <string name="settings">Settings</string>
     <string name="title_activity_settings">SettingsActivity</string>
+    <string name="click_to_open_app">Click to open app</string>
+    <string name="period_coming_in_d_days" formatted="false">Period coming in %d days</string>
+    <string name="period_coming_soon">Period coming soon...</string>
+    <string name="period_coming_today">Period coming today</string>
 </resources>

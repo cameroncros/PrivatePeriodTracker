@@ -11,9 +11,8 @@ class Stats {
             numbers.sort()
 
             // Remove all numbers greater than 1.5 * the mean.
-            var cutoff = mean(numbers) * 1.5
-            while (numbers[numbers.size - 1] > cutoff)
-            {
+            val cutoff = mean(numbers) * 1.5
+            while (numbers[numbers.size - 1] > cutoff) {
                 numbers.removeAt(numbers.size - 1)
             }
         }

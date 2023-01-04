@@ -14,8 +14,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
 
-const val REQUEST_START: Int = 1
 const val CHANNEL_ID: String = "PeriodDue"
+const val DAYKEY: String = "days"
 
 class AlarmReceiver : BroadcastReceiver() {
     private fun createNotificationChannel(context: Context) {
@@ -33,7 +33,7 @@ class AlarmReceiver : BroadcastReceiver() {
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun sendNotification(context: Context) {
+    private fun sendNotification(context: Context, days: Int) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED
@@ -53,10 +53,19 @@ class AlarmReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_IMMUTABLE
         )
 
+        val title: String = if (days < 0) {
+            context.getString(R.string.period_coming_soon)
+        } else if (days == 0) {
+            context.getString(R.string.period_coming_today)
+        } else {
+            val format = context.getString(R.string.period_coming_in_d_days)
+            String.format(format, days)
+        }
+
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.icon_period_start)
-            .setContentTitle("Period starting soon...")
-            .setContentText("Click to open app")
+            .setContentTitle(title)
+            .setContentText(context.getString(R.string.click_to_open_app))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
         with(NotificationManagerCompat.from(context)) {
@@ -70,6 +79,7 @@ class AlarmReceiver : BroadcastReceiver() {
         if (context == null) {
             return
         }
-        sendNotification(context)
+        val day = intent?.getIntExtra(DAYKEY, -1)!!
+        sendNotification(context, day)
     }
 }
