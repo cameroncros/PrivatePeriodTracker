@@ -11,11 +11,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.cross.privateperiodtracker.data.EventType
 import com.cross.privateperiodtracker.data.PeriodEvent
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
-import java.time.temporal.TemporalField
 
 class AddEventActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,14 +49,14 @@ class AddEventActivity : AppCompatActivity() {
         val calendar = findViewById<CalendarView>(R.id.calendarView2)
         calendar.date = now.toEpochSecond(ZoneOffset.UTC) * 1000
         calendar.setOnDateChangeListener { calView: CalendarView, year: Int, month: Int, dayOfMonth: Int ->
-            val localdate: LocalDateTime = LocalDateTime.of(year, month+1, dayOfMonth, 0, 0)
+            val localdate: LocalDateTime = LocalDateTime.of(year, month + 1, dayOfMonth, 0, 0)
             calView.setDate(localdate.toEpochSecond(ZoneOffset.UTC) * 1000, false, false)
         }
 
         val radiobuttons = findViewById<RadioGroup>(R.id.radioGroup)
         radiobuttons.check(R.id.radioPeriodStart)
 
-        val save = findViewById<Button>(R.id.addEvent)
+        val save = findViewById<Button>(R.id.saveEvent)
         save.setOnClickListener {
             run {
                 val date = LocalDateTime.ofEpochSecond(calendar.date / 1000, 0, ZoneOffset.UTC)

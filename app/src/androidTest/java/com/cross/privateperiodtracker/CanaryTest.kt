@@ -37,13 +37,6 @@ class CanaryTest {
         val appCompatEditText = onView(
             allOf(
                 withId(R.id.realPassword),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    1
-                ),
                 isDisplayed()
             )
         )
@@ -52,13 +45,6 @@ class CanaryTest {
         val appCompatEditText2 = onView(
             allOf(
                 withId(R.id.duressPassword),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    3
-                ),
                 isDisplayed()
             )
         )
@@ -67,13 +53,6 @@ class CanaryTest {
         val materialButton = onView(
             allOf(
                 withId(R.id.save), withText("Save"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    5
-                ),
                 isDisplayed()
             )
         )
@@ -82,13 +61,6 @@ class CanaryTest {
         val appCompatEditText3 = onView(
             allOf(
                 withId(R.id.textPassword),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    1
-                ),
                 isDisplayed()
             )
         )
@@ -97,13 +69,6 @@ class CanaryTest {
         val materialButton2 = onView(
             allOf(
                 withId(R.id.button4), withText("Login"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    2
-                ),
                 isDisplayed()
             )
         )

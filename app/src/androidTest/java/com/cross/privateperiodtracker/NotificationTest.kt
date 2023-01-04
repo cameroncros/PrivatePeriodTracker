@@ -130,13 +130,6 @@ class NotificationTest {
         val appCompatEditText4 = onView(
             allOf(
                 withId(R.id.textPassword),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    1
-                ),
                 isDisplayed()
             )
         )
@@ -145,13 +138,6 @@ class NotificationTest {
         val materialButton2 = onView(
             allOf(
                 withId(R.id.button4), withText("Login"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    2
-                ),
                 isDisplayed()
             )
         )

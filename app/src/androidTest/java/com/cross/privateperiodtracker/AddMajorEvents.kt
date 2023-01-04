@@ -17,7 +17,6 @@ import com.cross.privateperiodtracker.lib.listFiles
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
-import org.hamcrest.Matchers.`is`
 import org.hamcrest.TypeSafeMatcher
 import org.junit.Before
 import org.junit.Test
@@ -40,16 +39,10 @@ class AddMajorEvents {
             )
         }
         ActivityScenario.launch(EntryActivity::class.java)
+
         val appCompatEditText = onView(
             allOf(
                 withId(R.id.realPassword),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    1
-                ),
                 isDisplayed()
             )
         )
@@ -58,13 +51,6 @@ class AddMajorEvents {
         val appCompatEditText2 = onView(
             allOf(
                 withId(R.id.duressPassword),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    3
-                ),
                 isDisplayed()
             )
         )
@@ -73,13 +59,6 @@ class AddMajorEvents {
         val materialButton = onView(
             allOf(
                 withId(R.id.save), withText("Save"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    5
-                ),
                 isDisplayed()
             )
         )
@@ -88,13 +67,6 @@ class AddMajorEvents {
         val appCompatEditText3 = onView(
             allOf(
                 withId(R.id.textPassword),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    1
-                ),
                 isDisplayed()
             )
         )
@@ -103,13 +75,6 @@ class AddMajorEvents {
         val materialButton2 = onView(
             allOf(
                 withId(R.id.button4), withText("Login"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    2
-                ),
                 isDisplayed()
             )
         )
@@ -117,14 +82,7 @@ class AddMajorEvents {
 
         val materialButton3 = onView(
             allOf(
-                withId(R.id.addEvent), withText("Add Event"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    3
-                ),
+                withId(R.id.addEvent), withText(R.string.add_event),
                 isDisplayed()
             )
         )
@@ -133,13 +91,6 @@ class AddMajorEvents {
         val materialTextView = onView(
             allOf(
                 withId(R.id.editTextTime),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    3
-                ),
                 isDisplayed()
             )
         )
@@ -148,27 +99,13 @@ class AddMajorEvents {
         val materialButton4 = onView(
             allOf(
                 withId(android.R.id.button1), withText("OK"),
-                childAtPosition(
-                    childAtPosition(
-                        withClassName(`is`("android.widget.ScrollView")),
-                        0
-                    ),
-                    3
-                )
             )
         )
         materialButton4.perform(scrollTo(), click())
 
         val materialButton5 = onView(
             allOf(
-                withId(R.id.addEvent), withText("Save Event"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    0
-                ),
+                withId(R.id.saveEvent), withText("Save Event"),
                 isDisplayed()
             )
         )
@@ -177,13 +114,6 @@ class AddMajorEvents {
         val materialButton6 = onView(
             allOf(
                 withId(R.id.addEvent), withText("Add Event"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    3
-                ),
                 isDisplayed()
             )
         )
@@ -192,13 +122,6 @@ class AddMajorEvents {
         val materialTextView2 = onView(
             allOf(
                 withId(R.id.editTextTime),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    3
-                ),
                 isDisplayed()
             )
         )
@@ -207,13 +130,6 @@ class AddMajorEvents {
         val materialButton7 = onView(
             allOf(
                 withId(android.R.id.button1), withText("OK"),
-                childAtPosition(
-                    childAtPosition(
-                        withClassName(`is`("android.widget.ScrollView")),
-                        0
-                    ),
-                    3
-                )
             )
         )
         materialButton7.perform(scrollTo(), click())
@@ -221,30 +137,13 @@ class AddMajorEvents {
         val materialRadioButton = onView(
             allOf(
                 withId(R.id.radioPeriodStop), withText("Period End"),
-                childAtPosition(
-                    allOf(
-                        withId(R.id.radioGroup),
-                        childAtPosition(
-                            withClassName(`is`("android.widget.HorizontalScrollView")),
-                            0
-                        )
-                    ),
-                    1
-                )
             )
         )
         materialRadioButton.perform(scrollTo(), click())
 
         val materialButton8 = onView(
             allOf(
-                withId(R.id.addEvent), withText("Save Event"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    0
-                ),
+                withId(R.id.saveEvent), withText("Save Event"),
                 isDisplayed()
             )
         )
@@ -253,13 +152,6 @@ class AddMajorEvents {
         val materialButton9 = onView(
             allOf(
                 withId(R.id.addEvent), withText("Add Event"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    3
-                ),
                 isDisplayed()
             )
         )
@@ -268,59 +160,21 @@ class AddMajorEvents {
         val materialRadioButton2 = onView(
             allOf(
                 withId(R.id.radioPainkiller), withText("Painkiller"),
-                childAtPosition(
-                    allOf(
-                        withId(R.id.radioGroup),
-                        childAtPosition(
-                            withClassName(`is`("android.widget.HorizontalScrollView")),
-                            0
-                        )
-                    ),
-                    2
-                )
             )
         )
         materialRadioButton2.perform(scrollTo(), click())
 
         val materialButton10 = onView(
             allOf(
-                withId(R.id.addEvent), withText("Save Event"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    0
-                ),
+                withId(R.id.saveEvent), withText("Save Event"),
                 isDisplayed()
             )
         )
         materialButton10.perform(click())
 
-        val constraintLayout = onView(
-            allOf(
-                childAtPosition(
-                    childAtPosition(
-                        withClassName(`is`("android.widget.LinearLayout")),
-                        3
-                    ),
-                    3
-                ),
-                isDisplayed()
-            )
-        )
-        constraintLayout.perform(click())
-
         val materialButton11 = onView(
             allOf(
                 withId(R.id.addEvent), withText("Add Event"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    3
-                ),
                 isDisplayed()
             )
         )
@@ -329,30 +183,13 @@ class AddMajorEvents {
         val materialRadioButton3 = onView(
             allOf(
                 withId(R.id.radioTampon), withText("Tampon"),
-                childAtPosition(
-                    allOf(
-                        withId(R.id.radioGroup),
-                        childAtPosition(
-                            withClassName(`is`("android.widget.HorizontalScrollView")),
-                            0
-                        )
-                    ),
-                    3
-                )
             )
         )
         materialRadioButton3.perform(scrollTo(), click())
 
         val materialButton12 = onView(
             allOf(
-                withId(R.id.addEvent), withText("Save Event"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    0
-                ),
+                withId(R.id.saveEvent), withText("Save Event"),
                 isDisplayed()
             )
         )
@@ -361,13 +198,6 @@ class AddMajorEvents {
         val materialButton13 = onView(
             allOf(
                 withId(R.id.addEvent), withText("Add Event"),
-                childAtPosition(
-                    childAtPosition(
-                        withId(android.R.id.content),
-                        0
-                    ),
-                    3
-                ),
                 isDisplayed()
             )
         )
