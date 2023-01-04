@@ -63,7 +63,7 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.icon_period_start)
+            .setSmallIcon(R.drawable.icon_notification)
             .setContentTitle(title)
             .setContentText(context.getString(R.string.click_to_open_app))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
