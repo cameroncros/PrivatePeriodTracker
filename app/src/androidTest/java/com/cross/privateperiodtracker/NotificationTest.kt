@@ -1,6 +1,7 @@
 package com.cross.privateperiodtracker
 
 
+import android.Manifest.permission.POST_NOTIFICATIONS
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
@@ -50,6 +51,11 @@ class NotificationTest {
         false
     )
 
+    @JvmField
+    @Rule
+    var mRuntimePermissionRule: GrantPermissionRule? =
+        GrantPermissionRule.grant(POST_NOTIFICATIONS)
+
     @Before
     fun setup() {
         val files = getInstrumentation().targetContext.filesDir
@@ -97,7 +103,7 @@ class NotificationTest {
         val notificationPeriod = Duration.ofDays(day.toLong())
 
         val lastEndDate =
-            LocalDateTime.now() + Duration.ofSeconds(10) + notificationPeriod - periodCycle + periodLength
+            LocalDateTime.now() + Duration.ofSeconds(30) + notificationPeriod - periodCycle + periodLength
         var date = lastEndDate
         fm.data.addEvent(PeriodEvent(date, EventType.PeriodEnd))
         date -= periodLength

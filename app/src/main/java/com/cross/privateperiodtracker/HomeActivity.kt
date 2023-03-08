@@ -303,9 +303,14 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        this.registerReceiver(
+        var flags = 0
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            flags = RECEIVER_NOT_EXPORTED
+        }
+        registerReceiver(
             AlarmReceiver(),
-            IntentFilter("cross.privateperiodtracker.NEXT_PERIOD_DUE")
+            IntentFilter("cross.privateperiodtracker.NEXT_PERIOD_DUE"),
+            flags
         )
         val manager = this.getSystemService(ALARM_SERVICE) as AlarmManager
 

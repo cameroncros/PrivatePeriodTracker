@@ -59,6 +59,14 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+
+        <receiver
+            android:name=".AlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="cross.privateperiodtracker.NEXT_PERIOD_DUE" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
