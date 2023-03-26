@@ -1,16 +1,9 @@
 package com.cross.privateperiodtracker
 
-import android.Manifest
 import android.app.Activity
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Intent
-import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.os.Build
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.os.SystemClock
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
@@ -25,7 +18,6 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
-import androidx.core.app.ActivityCompat
 import androidx.core.view.children
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -45,6 +37,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
@@ -289,60 +282,25 @@ class HomeActivity : AppCompatActivity() {
             return
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ActivityCompat.checkSelfPermission(
-                    applicationContext,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                    0
-                )
-            }
-        }
-
-        var flags = 0
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            flags = RECEIVER_NOT_EXPORTED
-        }
-        registerReceiver(
-            AlarmReceiver(),
-            IntentFilter("cross.privateperiodtracker.NEXT_PERIOD_DUE"),
-            flags
-        )
-        val manager = this.getSystemService(ALARM_SERVICE) as AlarmManager
+        NotificationReceiver.requestSendNotificationsPermission(this)
 
         val nextPeriodDate = dataManager.data.calcNextPeriodDate() ?: return
 
+        // Save next times to shared preferences.
+        val spedit: SharedPreferences.Editor = prefs.edit()
         for (day in 0..7) {
             val alarmTime = nextPeriodDate.minusDays(day.toLong())
             if (alarmTime < LocalDateTime.now()) {
                 continue
             }
 
-            val nextPeriod = Duration.between(LocalDateTime.now(), alarmTime)
+            val dateKey = day.toString() + "date"
 
-            val intent = Intent("cross.privateperiodtracker.NEXT_PERIOD_DUE")
-            intent.putExtra(DAYKEY, day)
-            val pintent = PendingIntent.getBroadcast(
-                this,
-                day,
-                intent,
-                FLAG_IMMUTABLE
-            )
-            manager.cancel(pintent)
-
-            val prefKey = day.toString() + "days"
-            if (prefs.getBoolean(prefKey, false)) {
-                manager.setExactAndAllowWhileIdle(
-                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + nextPeriod.toMillis(),
-                    pintent
-                )
-            }
+            spedit.putLong(dateKey, alarmTime.toEpochSecond(ZoneOffset.UTC))
         }
+        spedit.apply()
+
+        NotificationReceiver.configNotifications(applicationContext)
     }
 
     private fun updateStats(): String {

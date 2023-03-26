@@ -16,8 +16,9 @@ class EntryActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStart()
-    {
+    override fun onStart() {
+        startForegroundService(Intent(this, StickyService::class.java))
+
         super.onStart()
         if (listFiles(applicationContext.filesDir).hasNext()) {
             val k = Intent(this, LoginActivity::class.java)
@@ -26,8 +27,9 @@ class EntryActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume()
-    {
+    override fun onResume() {
+        startForegroundService(Intent(this, StickyService::class.java))
+
         super.onResume()
         if (listFiles(applicationContext.filesDir).hasNext()) {
             val k = Intent(this, LoginActivity::class.java)

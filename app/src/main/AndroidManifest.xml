@@ -2,9 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -15,7 +17,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PrivatePeriodTracker"
-        tools:targetApi="31">
+        tools:targetApi="33">
+        <activity
+            android:name=".DebugActivity"
+            android:exported="true"
+            android:label="DebugActivity"
+            android:theme="@style/Theme.PrivatePeriodTracker" />
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
@@ -60,13 +67,16 @@
                 android:value="" />
         </activity>
 
+        <service android:name=".StickyService" />
+
+        <!-- Bootup receiver, to start stick service -->
         <receiver
-            android:name=".AlarmReceiver"
-            android:exported="false">
+            android:name=".NotificationReceiver"
+            android:exported="true">
             <intent-filter>
-                <action android:name="cross.privateperiodtracker.NEXT_PERIOD_DUE" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
     </application>
-
 </manifest>

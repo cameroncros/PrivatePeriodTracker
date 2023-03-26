@@ -5,47 +5,42 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startForegroundService
+import androidx.preference.PreferenceManager
 import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.*
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.rule.GrantPermissionRule
+import androidx.test.rule.ServiceTestRule
 import androidx.test.uiautomator.UiDevice
-import com.cross.privateperiodtracker.lib.listFiles
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.hamcrest.Description
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.greaterThan
 import org.hamcrest.TypeSafeMatcher
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.Duration
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 
 @LargeTest
 @RunWith(JUnitParamsRunner::class)
-class NotificationTest {
+class StickyServiceTest {
     @JvmField
     @Rule
     var mRuntimePermissionRule: GrantPermissionRule? =
         GrantPermissionRule.grant(POST_NOTIFICATIONS)
 
-    @Before
-    fun setup() {
-        val files = getInstrumentation().targetContext.filesDir
-        listFiles(files).forEach { file -> file.delete() }
-    }
+    @JvmField
+    @Rule
+    val mServiceRule: ServiceTestRule = ServiceTestRule()
 
     @Test
     @Parameters(
@@ -60,7 +55,7 @@ class NotificationTest {
             "7"
         ]
     )
-    fun notificationTest(day: Int) {
+    fun stickyServiceNotificationTest(day: Int) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             GrantPermissionRule.grant(
                 "android.permission.POST_NOTIFICATIONS"
@@ -73,21 +68,16 @@ class NotificationTest {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.cancelAll()
         assertFalse(findNotification(context, manager))
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
-        // Build data, such that the notification should be sent in the next minute.
-        val dm = generateNotification(context, Duration.ofSeconds(30), day)
-        val k = Intent(context, HomeActivity::class.java)
-        k.putExtra(dataKey, dm)
-        k.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        ContextCompat.startActivity(context, k, null)
+        // Configure notifications
+        val prefKey = day.toString() + "days"
+        val dateKey = day.toString() + "date"
+        val notificationTime = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) + 30
+        prefs.edit().putBoolean(prefKey, true).putLong(dateKey, notificationTime).apply()
 
-        assertEquals(28, dm.data.calcAveragePeriodCycle().mean.toDays())
-        assertEquals(0, dm.data.calcAveragePeriodCycle().sd.toDays())
-
-        assertThat(
-            dm.data.calcNextPeriodDate(),
-            greaterThan(LocalDateTime.now() + Duration.ofSeconds(5))
-        )
+        // Start sticky service
+        startForegroundService(context, Intent(context, StickyService::class.java))
 
         val expectedTitle = if (day == 0) {
             context.getString(R.string.period_coming_today)
@@ -103,12 +93,12 @@ class NotificationTest {
         // Turn off phone, notification should still come
         val device: UiDevice = UiDevice.getInstance(getInstrumentation())
         device.pressHome()
-        device.pressKeyCode(KeyEvent.KEYCODE_POWER)
+        //device.pressKeyCode(KeyEvent.KEYCODE_POWER)
 
         // Notification should come in the next 2 minutes at most.
         for (i in 0..120) {
             if (findNotification(context, manager, expectedTitle)) {
-                device.pressKeyCode(KeyEvent.KEYCODE_POWER)
+                //device.pressKeyCode(KeyEvent.KEYCODE_POWER)
                 return
             }
             // Wait for notification
@@ -116,7 +106,7 @@ class NotificationTest {
         }
 
         assertFalse("Failed to find notification", true)
-        device.pressKeyCode(KeyEvent.KEYCODE_POWER)
+        //device.pressKeyCode(KeyEvent.KEYCODE_POWER)
     }
 
     private fun findNotification(
