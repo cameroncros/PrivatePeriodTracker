@@ -12,12 +12,8 @@ before_script:
   - apt-get update --yes
   - apt-get install wget gnupg gnupg2 unzip --yes
 
-  # install liberica jdk 11 https://bell-sw.com/libericajdk/
-  - wget -q -O - https://download.bell-sw.com/pki/GPG-KEY-bellsoft | apt-key add -
-  - echo "deb [arch=amd64] https://apt.bell-sw.com/ stable main" | tee /etc/apt/sources.list.d/bellsoft.list
-  - apt-get --quiet update --yes
-  - apt-get install bellsoft-java11-lite --yes
-  - java -version
+  # install jdk 17
+  - apt install -y openjdk-17-jdkCOPY
 
   # download and unzip android sdk
   - wget --quiet --output-document=android-sdk.zip https://dl.google.com/android/repository/commandlinetools-linux-${SDK_TOOLS}_latest.zip
