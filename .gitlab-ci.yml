@@ -10,10 +10,7 @@ before_script:
 
   # install required packages
   - apt-get update --yes
-  - apt-get install wget gnupg gnupg2 unzip --yes
-
-  # install jdk 17
-  - apt install -y openjdk-17-jdkCOPY
+  - apt-get install wget gnupg gnupg2 unzip openjdk-17-jdk --yes
 
   # download and unzip android sdk
   - wget --quiet --output-document=android-sdk.zip https://dl.google.com/android/repository/commandlinetools-linux-${SDK_TOOLS}_latest.zip
