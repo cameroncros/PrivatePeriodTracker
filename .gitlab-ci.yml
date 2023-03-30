@@ -63,14 +63,14 @@ Instrumented Tests:
     - apt-get install libx11-dev libpulse0 libgl1 libnss3 libxcomposite-dev libxcursor1 libasound2 --yes
 
     # install android sdk components and emulator
-    - echo Y | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platform-tools" "emulator" "system-images;android-${API};default;x86"
+    - echo Y | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platform-tools" "emulator" "system-images;android-${API};default;x86_64"
 
     # download script for emulator waiting
     - wget --quiet --output-document=android-wait-for-emulator https://raw.githubusercontent.com/travis-ci/travis-cookbooks/0f497eb71291b52a703143c5cd63a217c8766dc9/community-cookbooks/android-sdk/files/default/android-wait-for-emulator
     - chmod +x android-wait-for-emulator
 
     # create virtual device named "test"
-    - echo no | avdmanager -v create avd -n test -k "system-images;android-${API};default;x86"
+    - echo no | avdmanager -v create avd -n test -k "system-images;android-${API};default;x86_64"
 
     # start adb server
     - adb start-server
