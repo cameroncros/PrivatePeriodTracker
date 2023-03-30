@@ -3,7 +3,7 @@ image: ubuntu:22.04
 variables:
   ANDROID_COMPILE_SDK: "33"
   ANDROID_BUILD_TOOLS: "33.0.2"
-  EMULATOR_IMAGE: "24"
+  EMULATOR_IMAGE: "27"
   SDK_TOOLS: "9477386" # from https://developer.android.com/studio/#command-tools
 
 before_script:
@@ -60,14 +60,14 @@ instrumented tests:
     - apt-get install libx11-dev libpulse0 libgl1 libnss3 libxcomposite-dev libxcursor1 libasound2 --yes
 
     # install android sdk components and emulator
-    - sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platform-tools" "emulator" "system-images;android-${EMULATOR_IMAGE};default;armeabi-v7a"
+    - sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platform-tools" "emulator" "system-images;android-${EMULATOR_IMAGE};default;x86"
 
     # download script for emulator waiting
     - wget --quiet --output-document=android-wait-for-emulator https://raw.githubusercontent.com/travis-ci/travis-cookbooks/0f497eb71291b52a703143c5cd63a217c8766dc9/community-cookbooks/android-sdk/files/default/android-wait-for-emulator
     - chmod +x android-wait-for-emulator
 
     # create virtual device named "test"
-    - echo no | avdmanager -v create avd -n test -k "system-images;android-${EMULATOR_IMAGE};default;armeabi-v7a"
+    - echo no | avdmanager -v create avd -n test -k "system-images;android-${EMULATOR_IMAGE};default;x86"
 
     # start adb server
     - adb start-server
