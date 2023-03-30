@@ -1,50 +1,37 @@
 image: ubuntu:22.04
 
-variables:
-  ANDROID_COMPILE_SDK: "33"
-  ANDROID_BUILD_TOOLS: "33.0.2"
-  EMULATOR_IMAGE: "27"
-  SDK_TOOLS: "9477386" # from https://developer.android.com/studio/#command-tools
-
-before_script:
-
-  # install required packages
-  - apt-get update --yes
-  - apt-get install wget gnupg gnupg2 unzip openjdk-17-jdk --yes
-
-  # download and unzip android sdk
-  - wget --quiet --output-document=android-sdk.zip https://dl.google.com/android/repository/commandlinetools-linux-${SDK_TOOLS}_latest.zip
-  - echo A | unzip -q android-sdk.zip -d android-sdk-linux
-  - rm android-sdk.zip
-
-  # export gradle home path
-  - export GRADLE_USER_HOME=$PWD/.gradle
-
-  # export android sdk path
-  - export ANDROID_SDK_ROOT=$PWD/android-sdk-linux
-
-  # export android sdk executables paths
-  - export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/
-  - export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools/
-  - export PATH=$PATH:$ANDROID_SDK_ROOT/emulator/
-
-  # hack with moving cmdline-tools to cmdline-tools/latest, no idea how to install directly
-  - mkdir $ANDROID_SDK_ROOT/cmdline-tools/latest
-  - mv $ANDROID_SDK_ROOT/cmdline-tools/{lib,bin,source.properties,NOTICE.txt} $ANDROID_SDK_ROOT/cmdline-tools/latest
-
-  # update and install common android sdk components
-  - sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --update
-  - echo y | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platforms;android-${ANDROID_COMPILE_SDK}" "build-tools;${ANDROID_BUILD_TOOLS}"
-
-  - chmod +x ./gradlew
-
 stages:
+  - buildContainer
   - test
+
+Build Container:
+  stage: buildContainer
+  image: docker
+  parallel:
+    matrix:
+      - ANDROID_IMAGE: 'system-images;android-27;default;x86_64'
+        API: 27
+      - ANDROID_IMAGE: 'system-images;android-28;default;x86_64'
+        API: 28
+      - ANDROID_IMAGE: 'system-images;android-29;default;x86_64'
+        API: 29
+      - ANDROID_IMAGE: 'system-images;android-30;default;x86_64'
+        API: 30
+      - ANDROID_IMAGE: 'system-images;android-31;default;x86_64'
+        API: 31
+      - ANDROID_IMAGE: 'system-images;android-32;google_apis;x86_64'
+        API: 32
+      - ANDROID_IMAGE: 'system-images;android-33;google_apis;x86_64'
+        API: 33
+  script:
+    - cd .gitlab/ && docker build --build-arg ANDROID_IMAGE=${ANDROID_IMAGE} -t androidtest-${API} .
 
 Unit Tests:
   stage: test
   script:
+    - chmod +x ./gradlew
     - ./gradlew testDebugUnitTest
+  image: androidtest-33
   artifacts:
     when: always
     reports:
@@ -56,28 +43,32 @@ Instrumented Tests:
   stage: test
   parallel:
     matrix:
-      - API: [ '27', '28', '29', '30', '31', '32', '33' ]
+      - ANDROID_IMAGE: 'system-images;android-27;default;x86_64'
+        API: 27
+      - ANDROID_IMAGE: 'system-images;android-28;default;x86_64'
+        API: 28
+      - ANDROID_IMAGE: 'system-images;android-29;default;x86_64'
+        API: 29
+      - ANDROID_IMAGE: 'system-images;android-30;default;x86_64'
+        API: 30
+      - ANDROID_IMAGE: 'system-images;android-31;default;x86_64'
+        API: 31
+      - ANDROID_IMAGE: 'system-images;android-32;google_apis;x86_64'
+        API: 32
+      - ANDROID_IMAGE: 'system-images;android-33;google_apis;x86_64'
+        API: 33
+  image: androidtest-${API}
   script:
-
-    # install packages needed by emulator
-    - apt-get install libx11-dev libpulse0 libgl1 libnss3 libxcomposite-dev libxcursor1 libasound2 --yes
-
-    # install android sdk components and emulator
-    - echo Y | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platform-tools" "emulator" "system-images;android-${API};default;x86_64"
-
-    # download script for emulator waiting
-    - wget --quiet --output-document=android-wait-for-emulator https://raw.githubusercontent.com/travis-ci/travis-cookbooks/0f497eb71291b52a703143c5cd63a217c8766dc9/community-cookbooks/android-sdk/files/default/android-wait-for-emulator
-    - chmod +x android-wait-for-emulator
-
     # create virtual device named "test"
-    - echo no | avdmanager -v create avd -n test -k "system-images;android-${API};default;x86_64"
-
+    - sdkmanager --list
+    - echo no | avdmanager -v create avd -n test -k "${ANDROID_IMAGE}"
     # start adb server
     - adb start-server
 
     # run emulator and tests
     - emulator -avd test -no-boot-anim -no-window -no-audio -no-snapshot &
-    - ./android-wait-for-emulator
+    - android-wait-for-emulator
+    - chmod +x ./gradlew
     - ./gradlew connectedDebugAndroidTest
   artifacts:
     when: always
