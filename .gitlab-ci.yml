@@ -36,7 +36,7 @@ Unit Tests:
     when: always
     reports:
       junit: [
-        ./**/build/test-results/testDebugUnitTest/TEST-*.xml,
+        ./**/TEST-*.xml,
       ]
 
 Instrumented Tests:
@@ -74,5 +74,5 @@ Instrumented Tests:
     when: always
     reports:
       junit: [
-        ./**/build/outputs/androidTest-results/connected/TEST-*.xml,
+        ./**/TEST-*.xml,
       ]
