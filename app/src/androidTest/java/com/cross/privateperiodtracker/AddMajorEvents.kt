@@ -1,6 +1,7 @@
 package com.cross.privateperiodtracker
 
 
+import android.Manifest
 import android.os.Build
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
@@ -14,12 +15,22 @@ import androidx.test.rule.GrantPermissionRule
 import com.cross.privateperiodtracker.lib.listFiles
 import org.hamcrest.Matchers.allOf
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class AddMajorEvents {
+    @Rule
+    @JvmField
+    var grantPermissionRule: GrantPermissionRule =
+        if (Build.VERSION.SDK_INT >= 33) {
+            GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            GrantPermissionRule.grant()
+        }
+    
     @Before
     fun setup() {
         val files = InstrumentationRegistry.getInstrumentation().targetContext.filesDir
