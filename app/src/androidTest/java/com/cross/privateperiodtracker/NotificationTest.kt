@@ -15,6 +15,7 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.rule.GrantPermissionRule
+import androidx.test.rule.GrantPermissionRule.grant
 import androidx.test.uiautomator.UiDevice
 import com.cross.privateperiodtracker.lib.listFiles
 import junitparams.JUnitParamsRunner
@@ -36,10 +37,14 @@ import java.time.LocalDateTime
 @LargeTest
 @RunWith(JUnitParamsRunner::class)
 class NotificationTest {
-    @JvmField
     @Rule
-    var mRuntimePermissionRule: GrantPermissionRule? =
-        GrantPermissionRule.grant(POST_NOTIFICATIONS)
+    @JvmField
+    var grantPermissionRule: GrantPermissionRule =
+        if (Build.VERSION.SDK_INT >= 33) {
+            grant(POST_NOTIFICATIONS)
+        } else {
+            grant()
+        }
 
     @Before
     fun setup() {
@@ -62,7 +67,7 @@ class NotificationTest {
     )
     fun notificationTest(day: Int) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            GrantPermissionRule.grant(
+            grant(
                 "android.permission.POST_NOTIFICATIONS"
             )
         }

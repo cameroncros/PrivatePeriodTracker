@@ -33,10 +33,14 @@ import java.time.ZoneOffset
 @LargeTest
 @RunWith(JUnitParamsRunner::class)
 class StickyServiceTest {
-    @JvmField
     @Rule
-    var mRuntimePermissionRule: GrantPermissionRule? =
-        GrantPermissionRule.grant(POST_NOTIFICATIONS)
+    @JvmField
+    var grantPermissionRule: GrantPermissionRule =
+        if (Build.VERSION.SDK_INT >= 33) {
+            GrantPermissionRule.grant(POST_NOTIFICATIONS)
+        } else {
+            GrantPermissionRule.grant()
+        }
 
     @JvmField
     @Rule

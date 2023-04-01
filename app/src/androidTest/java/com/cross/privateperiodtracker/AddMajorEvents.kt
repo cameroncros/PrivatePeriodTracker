@@ -2,8 +2,6 @@ package com.cross.privateperiodtracker
 
 
 import android.os.Build
-import android.view.View
-import android.view.ViewGroup
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.*
@@ -14,10 +12,7 @@ import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import com.cross.privateperiodtracker.lib.listFiles
-import org.hamcrest.Description
-import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
-import org.hamcrest.TypeSafeMatcher
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,6 +33,7 @@ class AddMajorEvents {
                 "android.permission.POST_NOTIFICATIONS"
             )
         }
+
         ActivityScenario.launch(EntryActivity::class.java)
 
         val appCompatEditText = onView(
@@ -202,23 +198,5 @@ class AddMajorEvents {
             )
         )
         materialButton13.perform(click())
-    }
-
-    private fun childAtPosition(
-        parentMatcher: Matcher<View>, position: Int
-    ): Matcher<View> {
-
-        return object : TypeSafeMatcher<View>() {
-            override fun describeTo(description: Description) {
-                description.appendText("Child at position $position in parent ")
-                parentMatcher.describeTo(description)
-            }
-
-            public override fun matchesSafely(view: View): Boolean {
-                val parent = view.parent
-                return parent is ViewGroup && parentMatcher.matches(parent)
-                        && view == parent.getChildAt(position)
-            }
-        }
     }
 }
