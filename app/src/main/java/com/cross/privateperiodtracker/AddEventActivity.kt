@@ -6,11 +6,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.CalendarView
-import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.cross.privateperiodtracker.data.EventType
 import com.cross.privateperiodtracker.data.PeriodEvent
+import com.cross.privateperiodtracker.widget.RadioGroupFlowLayout
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
@@ -53,7 +53,7 @@ class AddEventActivity : AppCompatActivity() {
             calView.setDate(localdate.toEpochSecond(ZoneOffset.UTC) * 1000, false, false)
         }
 
-        val radiobuttons = findViewById<RadioGroup>(R.id.radioGroup)
+        val radiobuttons = findViewById<RadioGroupFlowLayout>(R.id.radioGroup)
         radiobuttons.check(R.id.radioPeriodStart)
 
         val save = findViewById<Button>(R.id.saveEvent)
