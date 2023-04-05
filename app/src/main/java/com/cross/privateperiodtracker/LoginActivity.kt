@@ -1,14 +1,19 @@
 package com.cross.privateperiodtracker
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.cross.privateperiodtracker.lib.DataManager
 import com.cross.privateperiodtracker.lib.Encryptor
+
+private const val s =
+    "https://github.com/cameroncros/PrivatePeriodTracker/blob/main/privacy-policy.md"
 
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +68,13 @@ class LoginActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
+        }
+
+        val privPolicy: TextView = findViewById(R.id.privacyPolicyButton2)
+        privPolicy.setOnClickListener {
+            val uri = Uri.parse(getString(R.string.priv_policy_url))
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            startActivity(intent)
         }
     }
 }
