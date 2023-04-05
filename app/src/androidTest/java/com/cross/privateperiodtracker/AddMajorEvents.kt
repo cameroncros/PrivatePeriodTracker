@@ -4,7 +4,6 @@ package com.cross.privateperiodtracker
 import android.Manifest
 import android.os.Build
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.*
 import androidx.test.espresso.matcher.ViewMatchers.*
@@ -14,6 +13,7 @@ import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import com.cross.privateperiodtracker.lib.listFiles
+import com.cross.privateperiodtracker.utils.Utils.Companion.performActionCount
 import org.hamcrest.Matchers.allOf
 import org.junit.Before
 import org.junit.Rule
@@ -24,22 +24,6 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class AddMajorEvents {
-    private fun performActionCount(
-        action: () -> Unit,
-        maxRepeatTimes: Int = -1
-    ) {
-        var success = false
-        var counter = if (maxRepeatTimes == -1) Int.MIN_VALUE else 0
-        while (!success && counter < maxRepeatTimes) {
-            success = try {
-                counter++
-                action()
-                true
-            } catch (e: NoMatchingViewException) {
-                false
-            }
-        }
-    }
 
     @Rule
     @JvmField
