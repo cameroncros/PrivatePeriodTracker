@@ -60,30 +60,9 @@ class AddMajorEvents {
         composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
         composeTestRule.onNodeWithTag("duress").performClick().performTextInput("123")
         composeTestRule.onNodeWithText(resources.getString(R.string.save)).performClick()
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(R.id.textPassword),
-                        isDisplayed()
-                    )
-                ).perform(replaceText("abc"), closeSoftKeyboard())
-            },
-            maxRepeatTimes = 20
-        )
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(R.id.button4), withText("Login"),
-                        isDisplayed()
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
+        
+        composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
+        composeTestRule.onNodeWithText(resources.getString(R.string.login)).performClick()
 
         performActionCount(
             action = {
