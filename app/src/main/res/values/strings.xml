@@ -51,5 +51,5 @@
     <string name="period_coming_in_d_days" formatted="false">Period coming in %d days</string>
     <string name="period_coming_soon">Period coming soon…</string>
     <string name="period_coming_today">Period coming today</string>
-    <string name="priv_policy_url">https://github.com/cameroncros/PrivatePeriodTracker/blob/main/privacy-policy.md</string>
+    <string name="priv_policy_url">https://github.com/cameroncros/PrivatePeriodTracker/blob/85792c1c2dd1c334c55b574083d9c437cef78dc6/privacy-policy.md</string>
 </resources>
