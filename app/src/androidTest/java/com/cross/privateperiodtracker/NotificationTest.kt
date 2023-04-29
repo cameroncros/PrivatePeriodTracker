@@ -86,19 +86,18 @@ class NotificationTest {
         k.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         ContextCompat.startActivity(context, k, null)
 
-        assertEquals(28, dm.data.calcAveragePeriodCycle().mean.toDays())
-        assertEquals(0, dm.data.calcAveragePeriodCycle().sd.toDays())
+        assertEquals(28, dm.data.calculator().calcAveragePeriodCycle().mean.toDays())
+        assertEquals(0, dm.data.calculator().calcAveragePeriodCycle().sd.toDays())
 
         assertThat(
-            dm.data.calcNextPeriodDate(),
+            dm.data.calculator().calcNextPeriodDate(),
             greaterThan(LocalDateTime.now() + Duration.ofSeconds(5))
         )
 
         val expectedTitle = if (day == 0) {
             context.getString(R.string.period_coming_today)
         } else {
-            val format = context.getString(R.string.period_coming_in_d_days)
-            String.format(format, day)
+            context.getString(R.string.period_coming_in_N_days, day)
         }
 
         // Notification shouldn't come early.

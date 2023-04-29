@@ -86,8 +86,7 @@ class StickyServiceTest {
         val expectedTitle = if (day == 0) {
             context.getString(R.string.period_coming_today)
         } else {
-            val format = context.getString(R.string.period_coming_in_d_days)
-            String.format(format, day)
+            context.getString(R.string.period_coming_in_N_days, day)
         }
 
         // Notification shouldn't come early.

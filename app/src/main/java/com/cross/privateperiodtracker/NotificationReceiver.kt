@@ -59,7 +59,7 @@ class NotificationReceiver : BroadcastReceiver() {
         } else if (days == 0) {
             context.getString(R.string.period_coming_today)
         } else {
-            val format = context.getString(R.string.period_coming_in_d_days)
+            val format = context.getString(R.string.period_coming_in_N_days)
             String.format(format, days)
         }
 
