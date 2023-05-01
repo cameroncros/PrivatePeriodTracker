@@ -3,15 +3,9 @@ package com.cross.privateperiodtracker
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Login
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -41,7 +34,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
-import com.cross.privateperiodtracker.data.generateData
 import com.cross.privateperiodtracker.lib.DataManager
 import com.cross.privateperiodtracker.lib.Encryptor
 import com.cross.privateperiodtracker.theme.PrivatePeriodTrackerTheme
@@ -154,7 +146,8 @@ fun Login(
 
                 Button(
                     onClick = { loginFn(pw) },
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.padding(8.dp)
+                    .testTag("login"),
                 ) {
                     Text(stringResource(id = R.string.login))
                     Icon(Icons.Filled.Login, "Login")

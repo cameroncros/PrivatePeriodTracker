@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -109,7 +110,8 @@ fun AddEvent(
         Row(
             Modifier
                 .fillMaxWidth(1f)
-                .clickable { showTimePicker = true },
+                .clickable { showTimePicker = true }
+                .testTag("eventtime"),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -153,21 +155,24 @@ fun AddEvent(
                 .padding(16.dp)
                 .fillMaxWidth(1f), horizontalArrangement = Arrangement.Center
         ) {
-            Button(onClick = {
-                val eventType = when (selectedEvent) {
-                    R.string.period_start -> EventType.PeriodStart
-                    R.string.period_end -> EventType.PeriodEnd
-                    R.string.painkiller -> EventType.Painkiller
-                    R.string.pregnancy_start -> EventType.PregnancyStart
-                    R.string.pregnancy_stop -> EventType.PregnancyEnd
-                    R.string.tampon_start -> EventType.TamponStart
-                    R.string.tampon_stop -> EventType.TamponEnd
-                    else -> EventType.PeriodStart
-                }
-                val eventTime = selectedDay.atTime(time.toLocalTime())
-                val event = PeriodEvent(eventTime, eventType)
-                addFn(event)
-            }) {
+            Button(
+                onClick = {
+                    val eventType = when (selectedEvent) {
+                        R.string.period_start -> EventType.PeriodStart
+                        R.string.period_end -> EventType.PeriodEnd
+                        R.string.painkiller -> EventType.Painkiller
+                        R.string.pregnancy_start -> EventType.PregnancyStart
+                        R.string.pregnancy_stop -> EventType.PregnancyEnd
+                        R.string.tampon_start -> EventType.TamponStart
+                        R.string.tampon_stop -> EventType.TamponEnd
+                        else -> EventType.PeriodStart
+                    }
+                    val eventTime = selectedDay.atTime(time.toLocalTime())
+                    val event = PeriodEvent(eventTime, eventType)
+                    addFn(event)
+                },
+                modifier = Modifier.testTag("saveevent")
+            ) {
                 Image(Icons.Filled.Save, "save")
                 Text(stringResource(id = R.string.save_event))
             }

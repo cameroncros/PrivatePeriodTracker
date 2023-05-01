@@ -3,27 +3,26 @@ package com.cross.privateperiodtracker
 
 import android.Manifest
 import android.os.Build
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import com.cross.privateperiodtracker.data.EventType
+import com.cross.privateperiodtracker.lib.DataManager
+import com.cross.privateperiodtracker.lib.Encryptor
 import com.cross.privateperiodtracker.lib.listFiles
-import com.cross.privateperiodtracker.utils.Utils.Companion.performActionCount
-import org.hamcrest.Matchers.allOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import java.lang.Thread.sleep
 
-
+@RunWith(AndroidJUnit4::class)
 class AddMajorEvents {
     @Rule
     @JvmField
@@ -35,10 +34,7 @@ class AddMajorEvents {
         }
 
     @get:Rule
-    var activityScenarioRule = ActivityScenarioRule(EntryActivity::class.java)
-
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<CreatePasswordActivity>()
+    val composeTestRule = createAndroidComposeRule<EntryActivity>()
 
     @Before
     fun setup() {
@@ -57,43 +53,42 @@ class AddMajorEvents {
         val resources = InstrumentationRegistry.getInstrumentation().targetContext.resources
         composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
         composeTestRule.onNodeWithTag("duress").performClick().performTextInput("123")
-        composeTestRule.onNodeWithText(resources.getString(R.string.save)).performClick()
-        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("save")
+            .assertTextContains(resources.getString(R.string.save))
+            .performClick()
 
         composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
-        composeTestRule.onNodeWithText(resources.getString(R.string.login)).performClick()
-        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("login")
+            .assertTextContains(resources.getString(R.string.login))
+            .performClick()
 
-        composeTestRule.onNodeWithText(resources.getString(R.string.add_event)).performClick()
-        composeTestRule.waitForIdle()
+        sleep(5000)
 
+        composeTestRule.onNodeWithTag("addevent")
+            .assertTextContains(resources.getString(R.string.add_event))
+            .performClick()
+
+        composeTestRule.onNodeWithTag("eventtime")
+            .performClick()
+
+        composeTestRule.onNodeWithText("OK").performClick()
+
+        composeTestRule.onNodeWithTag("saveevent")
+            .assertTextContains(resources.getString(R.string.save_event))
+            .performClick()
+
+        composeTestRule.onNodeWithTag("addevent")
+            .assertTextContains(resources.getString(R.string.add_event))
+            .performClick()
 
         composeTestRule.onNodeWithTag("eventtime").performClick()
 
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(android.R.id.button1), withText("OK"),
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
-        composeTestRule.onNodeWithText(resources.getString(R.string.save_event)).performClick()
+        composeTestRule.onNodeWithText("OK").performClick()
 
-        composeTestRule.onNodeWithText(resources.getString(R.string.add_event)).performClick()
-        composeTestRule.onNodeWithTag("eventtime").performClick()
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(android.R.id.button1), withText("OK"),
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
+        composeTestRule.onNodeWithTag("saveevent")
+            .assertTextContains(resources.getString(R.string.save_event))
+            .performClick()
+        sleep(1000)
 
         for (event in listOf(
             resources.getString(R.string.tampon_start),
@@ -104,21 +99,43 @@ class AddMajorEvents {
             resources.getString(R.string.pregnancy_start),
             resources.getString(R.string.pregnancy_stop)
         )) {
-            composeTestRule.onNodeWithText(resources.getString(R.string.add_event)).performClick()
+            composeTestRule.onNodeWithTag("addevent")
+                .assertTextContains(resources.getString(R.string.add_event))
+                .performClick()
 
-            performActionCount(
-                action = {
-                    onView(
-                        allOf(
-                            withText(event),
-                            isDisplayed()
-                        )
-                    ).perform(click())
-                },
-                maxRepeatTimes = 20
-            )
-            
-            composeTestRule.onNodeWithText(resources.getString(R.string.save_event)).performClick()
+            composeTestRule.onNodeWithTag("eventtime").performClick()
+
+            composeTestRule.onNodeWithText("OK").performClick()
+
+            composeTestRule.onNodeWithText(event).performClick()
+
+            composeTestRule.onNodeWithTag("saveevent")
+                .assertTextContains(resources.getString(R.string.save_event))
+                .performClick()
+            sleep(1000)
+        }
+
+        val filesDir = InstrumentationRegistry.getInstrumentation().targetContext.filesDir
+        val files = listFiles(filesDir).asSequence().toList()
+        assert(files.size == 2)
+
+        val dm = DataManager(
+            InstrumentationRegistry.getInstrumentation().targetContext,
+            Encryptor("abc")
+        )
+        dm.loadData()
+
+        assert(dm.data.events.size == 9)
+
+        for (eventtype in EventType.values()) {
+            var foundEvent = false
+            for (event in dm.data.events) {
+                if (event.type == eventtype) {
+                    foundEvent = true
+                    break
+                }
+            }
+            assert(foundEvent)
         }
     }
 }

@@ -133,7 +133,9 @@ fun CreatePassword(
 
             Button(
                 onClick = { saveFn(pw, duress) },
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .testTag("save"),
             ) {
                 Text(stringResource(id = R.string.save))
                 Icon(Icons.Filled.Save, "Save")

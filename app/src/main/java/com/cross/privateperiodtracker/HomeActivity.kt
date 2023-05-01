@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -184,14 +184,24 @@ fun Home(periodData: PeriodData, addFn: () -> Unit) {
             }
         )
 
-        LazyColumn(modifier = Modifier.padding(8.dp)) {
-            items(dayEvents) {
-                Event(event = it,
-                    delFn = { ev ->
-                        periodData.removeEvent(ev)
-                        calculator = periodData.calculator()
-                        dayEvents = calculator.getDayEvents(selectedDay)
-                    })
+        Row(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .weight(weight = 1f, fill = false)
+        )
+        {
+            Column(
+                modifier = Modifier
+                    .padding(8.dp)
+            ) {
+                for (it in dayEvents) {
+                    Event(event = it,
+                        delFn = { ev ->
+                            periodData.removeEvent(ev)
+                            calculator = periodData.calculator()
+                            dayEvents = calculator.getDayEvents(selectedDay)
+                        })
+                }
             }
         }
 
@@ -205,7 +215,8 @@ fun Home(periodData: PeriodData, addFn: () -> Unit) {
             Button(
                 onClick = {
                     addFn()
-                }
+                },
+                modifier = Modifier.testTag("addevent")
             ) {
                 Icon(Icons.Filled.Add, "add")
                 Text(stringResource(id = R.string.add_event))
