@@ -74,6 +74,10 @@ class StickyServiceTest {
         assertFalse(findNotification(context, manager))
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
+        val notifEnabled = mutableListOf(false, false, false, false, false, false, false, false)
+        notifEnabled[day] = true
+        SettingsManager.setNotificationEnabled(prefs, notifEnabled)
+
         // Configure notifications
         val prefKey = day.toString() + "days"
         val dateKey = day.toString() + "date"

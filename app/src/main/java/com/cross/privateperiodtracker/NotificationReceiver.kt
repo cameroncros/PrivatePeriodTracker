@@ -158,6 +158,8 @@ class NotificationReceiver : BroadcastReceiver() {
                 ContextCompat.RECEIVER_NOT_EXPORTED
             )
 
+            val notifications = SettingsManager.checkNotificationEnabled(prefs)
+
             // Enable notifications
             for (day in 0..7) {
                 // Setup notification intent
@@ -174,9 +176,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 manager.cancel(pintent)
 
                 // Check if notification should exist
-                val prefKey = day.toString() + "days"
-                val dayAlarmEnabled = prefs.getBoolean(prefKey, false)
-                if (!dayAlarmEnabled) {
+                if (!notifications[0]) {
                     continue
                 }
 

@@ -29,10 +29,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.preference.PreferenceManager
 import com.cross.privateperiodtracker.data.CurrentState
 import com.cross.privateperiodtracker.data.EventType
 import com.cross.privateperiodtracker.data.PeriodData
@@ -60,13 +62,13 @@ class AddEventActivity : ComponentActivity() {
         setContent {
             PrivatePeriodTrackerTheme {
                 AddEvent(
-                    periodData = dataManager.data,
-                    addFn = { event: PeriodEvent ->
-                        val data = Intent()
-                        data.putExtra(eventKey, event)
-                        setResult(Activity.RESULT_OK, data)
-                        finish()
-                    })
+                    periodData = dataManager.data
+                ) { events: List<PeriodEvent> ->
+                    val data = Intent()
+                    data.putExtra(eventKey, events.toTypedArray())
+                    setResult(Activity.RESULT_OK, data)
+                    finish()
+                }
             }
         }
     }
@@ -76,8 +78,10 @@ class AddEventActivity : ComponentActivity() {
 @Composable
 fun AddEvent(
     periodData: PeriodData,
-    addFn: (event: PeriodEvent) -> Unit
+    addFn: (List<PeriodEvent>) -> Unit
 ) {
+    val context = LocalContext.current
+    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
     val time by remember { mutableStateOf(LocalDateTime.now()) }
     var selectedEvent by remember {
@@ -169,7 +173,14 @@ fun AddEvent(
                     }
                     val eventTime = selectedDay.atTime(time.toLocalTime())
                     val event = PeriodEvent(eventTime, eventType)
-                    addFn(event)
+                    val events = mutableListOf(event)
+                    if (SettingsManager.checkAutoEndPeriod(prefs) && eventType == EventType.PeriodStart) {
+                        val days = SettingsManager.getAutoEndPeriodDays(prefs)
+                        val endEventTime = eventTime.plusDays(days)
+                        val endEvent = PeriodEvent(endEventTime, EventType.PeriodEnd)
+                        events.add(endEvent)
+                    }
+                    addFn(events)
                 },
                 modifier = Modifier.testTag("saveevent")
             ) {
@@ -185,7 +196,7 @@ fun AddEvent(
 fun AddEventPreview() {
     PrivatePeriodTrackerTheme {
         AddEvent(
-            periodData = generateData(),
-            addFn = { _: PeriodEvent -> })
+            periodData = generateData()
+        ) { _: List<PeriodEvent> -> }
     }
 }

@@ -81,8 +81,10 @@ class HomeActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult()
         ) { result: ActivityResult ->
             if (result.resultCode == Activity.RESULT_OK) {
-                val event: PeriodEvent = result.data?.extras!!.get(eventKey) as PeriodEvent
-                dataManager.data.addEvent(event)
+                val events = result.data?.extras!!.get(eventKey) as Array<PeriodEvent>
+                for (event in events) {
+                    dataManager.data.addEvent(event)
+                }
                 dataManager.saveData()
 
                 updateNotifications()

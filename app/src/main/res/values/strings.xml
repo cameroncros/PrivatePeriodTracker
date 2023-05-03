@@ -16,7 +16,7 @@
     <string name="save">Save</string>
     <string name="choose_a_quot_duress_quot_password_this_is_a_password_that_when_supplied_will_silently_generate_fake_data_that_will_appear_real_and_will_delete_your_actual_data">Choose a \"duress\" password. This is a password that when supplied, will silently generate fake data that will appear real, and will delete your actual data.</string>
     <string name="set_the_password_you_wish_to_use_to_encrypt_your_data_with_longer_is_better_and_avoid_re_using_an_existing_password_if_left_blank_no_password_will_be_required_to_access_your_data">Set the password you wish to use to encrypt your data with. Longer is better, and avoid re-using an existing password. If left blank, no password will be required to access your data.</string>
-    <string name="password">passowrd</string>
+    <string name="password">password</string>
     <string name="login">Login</string>
     <string name="enter_password">Enter Password:</string>
     <string name="title_activity_home">HomeActivity</string>
@@ -49,4 +49,10 @@
     <string name="priv_policy_url">https://github.com/cameroncros/PrivatePeriodTracker/blob/85792c1c2dd1c334c55b574083d9c437cef78dc6/privacy-policy.md</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="opening_debug_menu_in__clicks">Opening debug menu in %d clicks</string>
+    <string name="notification_settings">Notification Settings</string>
+    <string name="notify_on_day_X">Notify %d days before period</string>
+    <string name="notify_on_day">Send notification on the day</string>
+    <string name="auto_end_period">Automatically end period</string>
+    <string name="auto_end_period_after">"Auto end period after: "</string>
+    <string name="days">Days</string>
 </resources>

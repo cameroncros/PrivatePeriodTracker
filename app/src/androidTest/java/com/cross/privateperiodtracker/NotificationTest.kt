@@ -6,9 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.view.KeyEvent
-import android.view.View
-import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
 import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.*
 import androidx.test.espresso.matcher.ViewMatchers.*
@@ -20,10 +19,7 @@ import androidx.test.uiautomator.UiDevice
 import com.cross.privateperiodtracker.lib.listFiles
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
-import org.hamcrest.Description
-import org.hamcrest.Matcher
 import org.hamcrest.Matchers.greaterThan
-import org.hamcrest.TypeSafeMatcher
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Before
@@ -78,6 +74,11 @@ class NotificationTest {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.cancelAll()
         assertFalse(findNotification(context, manager))
+
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val notifEnabled = mutableListOf(false, false, false, false, false, false, false, false)
+        notifEnabled[day] = true
+        SettingsManager.setNotificationEnabled(prefs, notifEnabled)
 
         // Build data, such that the notification should be sent in the next minute.
         val dm = generateNotification(context, Duration.ofSeconds(30), day)
@@ -140,23 +141,5 @@ class NotificationTest {
             }
         }
         return false
-    }
-
-    private fun childAtPosition(
-        parentMatcher: Matcher<View>, position: Int
-    ): Matcher<View> {
-
-        return object : TypeSafeMatcher<View>() {
-            override fun describeTo(description: Description) {
-                description.appendText("Child at position $position in parent ")
-                parentMatcher.describeTo(description)
-            }
-
-            public override fun matchesSafely(view: View): Boolean {
-                val parent = view.parent
-                return parent is ViewGroup && parentMatcher.matches(parent)
-                        && view == parent.getChildAt(position)
-            }
-        }
     }
 }
