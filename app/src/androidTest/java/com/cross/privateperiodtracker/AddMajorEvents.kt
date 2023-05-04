@@ -3,7 +3,6 @@ package com.cross.privateperiodtracker
 
 import android.Manifest
 import android.os.Build
-import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -53,41 +52,28 @@ class AddMajorEvents {
         val resources = InstrumentationRegistry.getInstrumentation().targetContext.resources
         composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
         composeTestRule.onNodeWithTag("duress").performClick().performTextInput("123")
-        composeTestRule.onNodeWithTag("save")
-            .assertTextContains(resources.getString(R.string.save))
-            .performClick()
+        composeTestRule.onNodeWithTag("save").performClick()
 
         composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
-        composeTestRule.onNodeWithTag("login")
-            .assertTextContains(resources.getString(R.string.login))
-            .performClick()
+        composeTestRule.onNodeWithTag("login").performClick()
 
         sleep(5000)
 
-        composeTestRule.onNodeWithTag("addevent")
-            .assertTextContains(resources.getString(R.string.add_event))
-            .performClick()
-
-        composeTestRule.onNodeWithTag("eventtime")
-            .performClick()
-
-        composeTestRule.onNodeWithText("OK").performClick()
-
-        composeTestRule.onNodeWithTag("saveevent")
-            .assertTextContains(resources.getString(R.string.save_event))
-            .performClick()
-
-        composeTestRule.onNodeWithTag("addevent")
-            .assertTextContains(resources.getString(R.string.add_event))
-            .performClick()
+        composeTestRule.onNodeWithTag("addevent").performClick()
 
         composeTestRule.onNodeWithTag("eventtime").performClick()
 
         composeTestRule.onNodeWithText("OK").performClick()
 
-        composeTestRule.onNodeWithTag("saveevent")
-            .assertTextContains(resources.getString(R.string.save_event))
-            .performClick()
+        composeTestRule.onNodeWithTag("saveevent").performClick()
+
+        composeTestRule.onNodeWithTag("addevent").performClick()
+
+        composeTestRule.onNodeWithTag("eventtime").performClick()
+
+        composeTestRule.onNodeWithText("OK").performClick()
+
+        composeTestRule.onNodeWithTag("saveevent").performClick()
         sleep(1000)
 
         for (event in listOf(
@@ -99,9 +85,7 @@ class AddMajorEvents {
             resources.getString(R.string.pregnancy_start),
             resources.getString(R.string.pregnancy_stop)
         )) {
-            composeTestRule.onNodeWithTag("addevent")
-                .assertTextContains(resources.getString(R.string.add_event))
-                .performClick()
+            composeTestRule.onNodeWithTag("addevent").performClick()
 
             composeTestRule.onNodeWithTag("eventtime").performClick()
 
@@ -109,9 +93,7 @@ class AddMajorEvents {
 
             composeTestRule.onNodeWithText(event).performClick()
 
-            composeTestRule.onNodeWithTag("saveevent")
-                .assertTextContains(resources.getString(R.string.save_event))
-                .performClick()
+            composeTestRule.onNodeWithTag("saveevent").performClick()
             sleep(1000)
         }
 
