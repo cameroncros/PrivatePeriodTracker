@@ -81,9 +81,9 @@ class HomeActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult()
         ) { result: ActivityResult ->
             if (result.resultCode == Activity.RESULT_OK) {
-                val events = result.data?.extras!!.get(eventKey) as Array<PeriodEvent>
+                val events = result.data?.extras!!.get(eventKey) as Array<*>
                 for (event in events) {
-                    dataManager.data.addEvent(event)
+                    dataManager.data.addEvent(event as PeriodEvent)
                 }
                 dataManager.saveData()
 

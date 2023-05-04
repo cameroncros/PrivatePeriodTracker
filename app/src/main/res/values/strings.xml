@@ -22,7 +22,7 @@
     <string name="title_activity_home">HomeActivity</string>
     <string name="next_period_in_n_days">Next period in %d days…</string>
     <string name="you_have_been_pregnant_for_N_days">You have been pregnant for %d days, Congrats!</string>
-    <string name="your_cycle_is_x_days_and_your_average_period_is_y_days">Your cycle is %d days, and your average period is %d days</string>
+    <string name="your_cycle_is_x_days_and_your_average_period_is_y_days" formatted="false">Your cycle is %d days, and your average period is %d days</string>
     <string name="this_is_not_medical_advice_if_you_have_concerns_see_a_medical_professional">This is not medical advice. If you have concerns, see a medical professional</string>
     <string name="add_event">Add Event</string>
     <string name="unknown_state">Welcome. Start by adding your last period dates.</string>
