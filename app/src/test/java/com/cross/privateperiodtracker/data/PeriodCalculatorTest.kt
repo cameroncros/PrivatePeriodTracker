@@ -10,7 +10,7 @@ import org.junit.Test
 import java.time.Duration
 import java.time.LocalDateTime
 
-class PeriodDataTest {
+class PeriodCalculatorTest {
     @Test
     fun randLongTest() {
         for (i in 1..10000) {
@@ -27,40 +27,40 @@ class PeriodDataTest {
     @Test
     fun getStateTest_Unknown() {
         val pd = PeriodData()
-        assertEquals(CurrentState.Unknown, pd.getState())
+        assertEquals(CurrentState.Unknown, pd.calculator().getState())
     }
 
     @Test
     fun getStateTest_Period() {
         val pd = PeriodData()
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodStart))
-        assertEquals(CurrentState.Period, pd.getState())
+        assertEquals(CurrentState.Period, pd.calculator().getState())
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.Painkiller))
-        assertEquals(CurrentState.Period, pd.getState())
+        assertEquals(CurrentState.Period, pd.calculator().getState())
     }
 
     @Test
     fun getStateTest_Freedom() {
         val pd = PeriodData()
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodEnd))
-        assertEquals(CurrentState.Freedom, pd.getState())
+        assertEquals(CurrentState.Freedom, pd.calculator().getState())
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.Painkiller))
-        assertEquals(CurrentState.Freedom, pd.getState())
+        assertEquals(CurrentState.Freedom, pd.calculator().getState())
     }
 
     @Test
     fun getStateTest_Pregnant() {
         val pd = PeriodData()
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PregnancyStart))
-        assertEquals(CurrentState.Pregnant, pd.getState())
+        assertEquals(CurrentState.Pregnant, pd.calculator().getState())
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.Painkiller))
-        assertEquals(CurrentState.Pregnant, pd.getState())
+        assertEquals(CurrentState.Pregnant, pd.calculator().getState())
     }
 
     @Test
     fun calcAveragePeriodCycleTest() {
         val pd: PeriodData = generateData()
-        val pStats = pd.calcAveragePeriodCycle()
+        val pStats = pd.calculator().calcAveragePeriodCycle()
         assertThat(
             Duration.ofSeconds(pStats.mean.seconds),
             lessThanOrEqualTo(Duration.ofSeconds(MAX_PERIOD_CYCLE_S))
@@ -74,7 +74,7 @@ class PeriodDataTest {
     @Test
     fun calcPeriodLengthStats() {
         val pd: PeriodData = generateData()
-        val pStats = pd.calcAveragePeriodDuration()
+        val pStats = pd.calculator().calcAveragePeriodDuration()
         assertThat(pStats.mean.seconds, lessThanOrEqualTo(MAX_PERIOD_DURATION_S))
         assertThat(pStats.mean.seconds, greaterThanOrEqualTo(MIN_PERIOD_DURATION_S))
     }
@@ -84,7 +84,7 @@ class PeriodDataTest {
         val pd = PeriodData()
         for (i in 0..3) {
             pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodEnd))
-            assertNull(pd.calcNextPeriodDate())
+            assertNull(pd.calculator().calcNextPeriodDate())
         }
     }
 
@@ -96,7 +96,7 @@ class PeriodDataTest {
         pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodStart))
         for (i in 0..3) {
             pd.addEvent(PeriodEvent(LocalDateTime.now() + Duration.ofDays(3), EventType.PeriodEnd))
-            assertNotNull(pd.calcNextPeriodDate())
+            assertNotNull(pd.calculator().calcNextPeriodDate())
         }
     }
 
@@ -105,7 +105,7 @@ class PeriodDataTest {
         val pd = PeriodData()
         for (i in 0..3) {
             pd.addEvent(PeriodEvent(LocalDateTime.now(), EventType.PeriodEnd))
-            assertNull(pd.calcNextPeriodDate())
+            assertNull(pd.calculator().calcNextPeriodDate())
         }
     }
 
