@@ -28,7 +28,7 @@ ENV PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/:$ANDROID_SDK_ROOT/pla
 
 ARG ANDROID_IMAGE
 ARG ANDROID_COMPILE_SDK="33"
-ARG ANDROID_BUILD_TOOLS="34.0.0-rc3"
+ARG ANDROID_BUILD_TOOLS="33.0.2"
 RUN $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --update
 RUN yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platforms;android-${ANDROID_COMPILE_SDK}" "build-tools;${ANDROID_BUILD_TOOLS}"
 RUN yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platform-tools" "emulator" "${ANDROID_IMAGE}"
