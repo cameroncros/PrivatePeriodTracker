@@ -49,7 +49,7 @@ class AddMajorEvents {
                 "android.permission.POST_NOTIFICATIONS"
             )
         }
-        sleep(2000)
+
         val resources = InstrumentationRegistry.getInstrumentation().targetContext.resources
         composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
         composeTestRule.onNodeWithTag("duress").performClick().performTextInput("123")
@@ -57,42 +57,34 @@ class AddMajorEvents {
             .assertTextContains(resources.getString(R.string.save))
             .performClick()
 
-
-        sleep(2000)
         composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
         composeTestRule.onNodeWithTag("login")
             .assertTextContains(resources.getString(R.string.login))
             .performClick()
 
         sleep(5000)
+
         composeTestRule.onNodeWithTag("addevent")
             .assertTextContains(resources.getString(R.string.add_event))
             .performClick()
 
-        sleep(2000)
         composeTestRule.onNodeWithTag("eventtime")
             .performClick()
 
-        sleep(2000)
         composeTestRule.onNodeWithText("OK").performClick()
 
-        sleep(2000)
         composeTestRule.onNodeWithTag("saveevent")
             .assertTextContains(resources.getString(R.string.save_event))
             .performClick()
 
-        sleep(2000)
         composeTestRule.onNodeWithTag("addevent")
             .assertTextContains(resources.getString(R.string.add_event))
             .performClick()
 
-        sleep(2000)
         composeTestRule.onNodeWithTag("eventtime").performClick()
 
-        sleep(2000)
         composeTestRule.onNodeWithText("OK").performClick()
 
-        sleep(2000)
         composeTestRule.onNodeWithTag("saveevent")
             .assertTextContains(resources.getString(R.string.save_event))
             .performClick()
@@ -107,27 +99,21 @@ class AddMajorEvents {
             resources.getString(R.string.pregnancy_start),
             resources.getString(R.string.pregnancy_stop)
         )) {
-            sleep(2000)
             composeTestRule.onNodeWithTag("addevent")
                 .assertTextContains(resources.getString(R.string.add_event))
                 .performClick()
 
-            sleep(2000)
             composeTestRule.onNodeWithTag("eventtime").performClick()
 
-            sleep(2000)
             composeTestRule.onNodeWithText("OK").performClick()
 
-            sleep(2000)
             composeTestRule.onNodeWithText(event).performClick()
 
-            sleep(2000)
             composeTestRule.onNodeWithTag("saveevent")
                 .assertTextContains(resources.getString(R.string.save_event))
                 .performClick()
             sleep(1000)
         }
-        sleep(2000)
 
         val filesDir = InstrumentationRegistry.getInstrumentation().targetContext.filesDir
         val files = listFiles(filesDir).asSequence().toList()
