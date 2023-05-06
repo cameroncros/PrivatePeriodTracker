@@ -16,6 +16,8 @@ import com.cross.privateperiodtracker.data.EventType
 import com.cross.privateperiodtracker.lib.DataManager
 import com.cross.privateperiodtracker.lib.Encryptor
 import com.cross.privateperiodtracker.lib.listFiles
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -115,6 +117,8 @@ class AddMajorEvents {
             sleep(1000)
         }
 
+        sleep(10000)
+
         val filesDir = InstrumentationRegistry.getInstrumentation().targetContext.filesDir
         val files = listFiles(filesDir).asSequence().toList()
         assert(files.size == 2)
@@ -125,8 +129,6 @@ class AddMajorEvents {
         )
         dm.loadData()
 
-        assert(dm.data.events.size == 9)
-
         for (eventtype in EventType.values()) {
             var foundEvent = false
             for (event in dm.data.events) {
@@ -135,7 +137,9 @@ class AddMajorEvents {
                     break
                 }
             }
-            assert(foundEvent)
+            assertTrue("Found $eventtype", foundEvent)
         }
+
+        assertEquals(9, dm.data.events.size)
     }
 }
