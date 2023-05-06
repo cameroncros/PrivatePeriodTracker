@@ -176,7 +176,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 manager.cancel(pintent)
 
                 // Check if notification should exist
-                if (!notifications[0]) {
+                if (!notifications[day]) {
                     continue
                 }
 

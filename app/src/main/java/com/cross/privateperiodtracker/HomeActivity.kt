@@ -121,9 +121,6 @@ class HomeActivity : ComponentActivity() {
 
     private fun updateNotifications() {
         val prefs = getDefaultSharedPreferences(applicationContext)
-        if (!prefs.getBoolean("enabled", true)) {
-            return
-        }
 
         NotificationReceiver.requestSendNotificationsPermission(this)
 
