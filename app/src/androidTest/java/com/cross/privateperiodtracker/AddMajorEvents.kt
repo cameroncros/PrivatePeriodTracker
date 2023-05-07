@@ -3,7 +3,9 @@ package com.cross.privateperiodtracker
 
 import android.Manifest
 import android.os.Build
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -44,6 +46,7 @@ class AddMajorEvents {
         listFiles(files).forEach { file -> file.delete() }
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test
     fun addMajorEvents() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -52,29 +55,26 @@ class AddMajorEvents {
             )
         }
 
-        sleep(5000)
-
         val resources = InstrumentationRegistry.getInstrumentation().targetContext.resources
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("duress"), 1000000)
         composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
         composeTestRule.onNodeWithTag("duress").performClick().performTextInput("123")
         composeTestRule.onNodeWithTag("save")
             .assertTextContains(resources.getString(R.string.save))
             .performClick()
 
-        sleep(5000)
-
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("login"), 1000000)
         composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
         composeTestRule.onNodeWithTag("login")
             .assertTextContains(resources.getString(R.string.login))
             .performClick()
 
-        sleep(5000)
-
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("addevent"), 1000000)
         composeTestRule.onNodeWithTag("addevent")
             .assertTextContains(resources.getString(R.string.add_event))
             .performClick()
 
-        sleep(3000)
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("eventtime"), 1000000)
         composeTestRule.onNodeWithTag("eventtime")
             .performClick()
 
@@ -84,12 +84,12 @@ class AddMajorEvents {
             .assertTextContains(resources.getString(R.string.save_event))
             .performClick()
 
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("addevent"), 1000000)
         composeTestRule.onNodeWithTag("addevent")
             .assertTextContains(resources.getString(R.string.add_event))
             .performClick()
 
-        sleep(3000)
-
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("eventtime"), 1000000)
         composeTestRule.onNodeWithTag("eventtime").performClick()
 
         composeTestRule.onNodeWithText("OK").performClick()
@@ -97,7 +97,6 @@ class AddMajorEvents {
         composeTestRule.onNodeWithTag("saveevent")
             .assertTextContains(resources.getString(R.string.save_event))
             .performClick()
-        sleep(1000)
 
         for (event in listOf(
             resources.getString(R.string.tampon_start),
@@ -108,12 +107,12 @@ class AddMajorEvents {
             resources.getString(R.string.pregnancy_start),
             resources.getString(R.string.pregnancy_stop)
         )) {
+            composeTestRule.waitUntilAtLeastOneExists(hasTestTag("addevent"), 1000000)
             composeTestRule.onNodeWithTag("addevent")
                 .assertTextContains(resources.getString(R.string.add_event))
                 .performClick()
 
-            sleep(3000)
-
+            composeTestRule.waitUntilAtLeastOneExists(hasTestTag("eventtime"), 1000000)
             composeTestRule.onNodeWithTag("eventtime").performClick()
 
             composeTestRule.onNodeWithText("OK").performClick()
@@ -123,10 +122,9 @@ class AddMajorEvents {
             composeTestRule.onNodeWithTag("saveevent")
                 .assertTextContains(resources.getString(R.string.save_event))
                 .performClick()
-            sleep(1000)
         }
 
-        sleep(10000)
+        sleep(1000000)
 
         val filesDir = InstrumentationRegistry.getInstrumentation().targetContext.filesDir
         val files = listFiles(filesDir).asSequence().toList()
