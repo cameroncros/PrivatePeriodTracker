@@ -52,12 +52,16 @@ class AddMajorEvents {
             )
         }
 
+        sleep(5000)
+
         val resources = InstrumentationRegistry.getInstrumentation().targetContext.resources
         composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
         composeTestRule.onNodeWithTag("duress").performClick().performTextInput("123")
         composeTestRule.onNodeWithTag("save")
             .assertTextContains(resources.getString(R.string.save))
             .performClick()
+
+        sleep(5000)
 
         composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
         composeTestRule.onNodeWithTag("login")
