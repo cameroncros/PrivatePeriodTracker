@@ -70,6 +70,7 @@ class AddMajorEvents {
             .assertTextContains(resources.getString(R.string.add_event))
             .performClick()
 
+        sleep(3000)
         composeTestRule.onNodeWithTag("eventtime")
             .performClick()
 
@@ -82,6 +83,8 @@ class AddMajorEvents {
         composeTestRule.onNodeWithTag("addevent")
             .assertTextContains(resources.getString(R.string.add_event))
             .performClick()
+
+        sleep(3000)
 
         composeTestRule.onNodeWithTag("eventtime").performClick()
 
@@ -104,6 +107,8 @@ class AddMajorEvents {
             composeTestRule.onNodeWithTag("addevent")
                 .assertTextContains(resources.getString(R.string.add_event))
                 .performClick()
+
+            sleep(3000)
 
             composeTestRule.onNodeWithTag("eventtime").performClick()
 
