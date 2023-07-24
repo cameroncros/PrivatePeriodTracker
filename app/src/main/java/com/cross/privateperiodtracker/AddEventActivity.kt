@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Edit
@@ -104,11 +106,15 @@ fun AddEvent(
         R.string.tampon_start,
         R.string.tampon_stop
     )
-    Column {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
         Row {
             PeriodCalendar(
                 calculator = periodData.calculator(),
-                selectedDay = selectedDay,
+                initialSelectedDay = LocalDate.now(),
                 daySelectedFn = { day: LocalDate -> selectedDay = day })
         }
         Row(

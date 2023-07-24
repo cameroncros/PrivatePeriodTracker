@@ -32,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -148,11 +147,18 @@ class HomeActivity : ComponentActivity() {
 @Composable
 fun Home(periodData: PeriodData, addFn: () -> Unit) {
     val context = LocalContext.current
-    var selectedDay by remember { mutableStateOf(LocalDate.now()) }
+    val initialSelectedDay by remember { mutableStateOf(LocalDate.now()) }
     var calculator = periodData.calculator()
-    var dayEvents = calculator.getDayEvents(selectedDay)
+    var dayEvents = calculator.getDayEvents(initialSelectedDay)
 
-    Column(verticalArrangement = Arrangement.SpaceBetween) {
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.SpaceBetween
+    )
+    {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth(1f)
@@ -176,9 +182,8 @@ fun Home(periodData: PeriodData, addFn: () -> Unit) {
         )
 
         PeriodCalendar(calculator = calculator,
-            selectedDay = selectedDay,
+            initialSelectedDay = initialSelectedDay,
             daySelectedFn = { day: LocalDate ->
-                selectedDay = day
                 dayEvents = calculator.getDayEvents(day)
             }
         )
@@ -198,7 +203,7 @@ fun Home(periodData: PeriodData, addFn: () -> Unit) {
                         delFn = { ev ->
                             periodData.removeEvent(ev)
                             calculator = periodData.calculator()
-                            dayEvents = calculator.getDayEvents(selectedDay)
+                            dayEvents.remove(ev)
                         })
                 }
             }
@@ -212,9 +217,7 @@ fun Home(periodData: PeriodData, addFn: () -> Unit) {
         )
         {
             Button(
-                onClick = {
-                    addFn()
-                },
+                onClick = addFn,
                 modifier = Modifier.testTag("addevent")
             ) {
                 Icon(Icons.Filled.Add, "add")

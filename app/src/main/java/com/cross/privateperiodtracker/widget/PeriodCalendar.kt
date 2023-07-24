@@ -20,8 +20,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,13 +57,14 @@ import java.util.Locale
 @Composable
 fun PeriodCalendar(
     calculator: PeriodCalculator,
-    selectedDay: LocalDate,
+    initialSelectedDay: LocalDate,
     daySelectedFn: (day: LocalDate) -> Unit,
 ) {
-    val currentMonth = remember { YearMonth.now() }
-    val startMonth = remember { currentMonth.minusMonths(100) } // Adjust as needed
-    val endMonth = remember { currentMonth.plusMonths(100) } // Adjust as needed
-    val firstDayOfWeek = remember { firstDayOfWeekFromLocale() } // Available from the library
+    var selectedDay by remember { mutableStateOf(initialSelectedDay) }
+    val currentMonth by remember { mutableStateOf(YearMonth.now()) }
+    val startMonth by remember { mutableStateOf(currentMonth.minusMonths(100)) } // Adjust as needed
+    val endMonth by remember { mutableStateOf(currentMonth.plusMonths(100)) } // Adjust as needed
+    val firstDayOfWeek by remember { mutableStateOf(firstDayOfWeekFromLocale()) } // Available from the library
 
     val coroutineScope = rememberCoroutineScope()
     val state = rememberCalendarState(
@@ -77,6 +81,7 @@ fun PeriodCalendar(
                 day = it,
                 calculator = calculator,
                 clickFn = { cd: CalendarDay ->
+                    selectedDay = cd.date
                     daySelectedFn(cd.date)
                 },
                 selectedDay = selectedDay
@@ -134,9 +139,7 @@ fun MonthHeader(it: CalendarMonth, selectedDay: LocalDate, scrollFn: (md: YearMo
         }
         val heading = if (selectedDay.yearMonth == it.yearMonth) {
             selectedDay.toString()
-        }
-        else
-        {
+        } else {
             it.yearMonth.toString()
         }
         Text(heading)
@@ -238,10 +241,9 @@ fun DayPreview() {
             day = CalendarDay(date = date, position = DayPosition.MonthDate),
             selectedDay = date,
             calculator = periodData.calculator(),
-            clickFn = {
-                    cd: CalendarDay ->
-                        date = cd.date
-                    },
+            clickFn = { cd: CalendarDay ->
+                date = cd.date
+            },
         )
     }
 }
@@ -253,7 +255,7 @@ fun PeriodCalendarPreview() {
     PrivatePeriodTrackerTheme {
         PeriodCalendar(
             calculator = periodData.calculator(),
-            selectedDay = LocalDate.now(),
+            initialSelectedDay = LocalDate.now(),
             daySelectedFn = { _: LocalDate -> },
         )
     }

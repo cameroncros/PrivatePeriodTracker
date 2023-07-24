@@ -9,6 +9,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -25,7 +26,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.lang.Thread.sleep
 import java.time.temporal.ChronoUnit
 import kotlin.random.Random
 
@@ -76,16 +76,16 @@ class AddEvents {
         composeTestRule.onNodeWithTag("addevent")
             .assertTextContains(resources.getString(R.string.add_event))
             .performClick()
-
-        sleep(3000)
+        composeTestRule.waitForIdle()
 
         composeTestRule.onNodeWithText(resources.getString(R.string.period_start)).performClick()
 
         composeTestRule.onNodeWithTag("saveevent")
             .assertTextContains(resources.getString(R.string.save_event))
+            .performScrollTo()
             .performClick()
 
-        sleep(10000)
+        composeTestRule.waitForIdle()
 
         val filesDir = InstrumentationRegistry.getInstrumentation().targetContext.filesDir
         val files = listFiles(filesDir).asSequence().toList()
