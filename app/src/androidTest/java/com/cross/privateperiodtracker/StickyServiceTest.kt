@@ -74,6 +74,10 @@ class StickyServiceTest {
         assertFalse(findNotification(context, manager))
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
+        val notifEnabled = mutableListOf(false, false, false, false, false, false, false, false)
+        notifEnabled[day] = true
+        SettingsManager.setNotificationEnabled(prefs, notifEnabled)
+
         // Configure notifications
         val prefKey = day.toString() + "days"
         val dateKey = day.toString() + "date"
@@ -86,8 +90,7 @@ class StickyServiceTest {
         val expectedTitle = if (day == 0) {
             context.getString(R.string.period_coming_today)
         } else {
-            val format = context.getString(R.string.period_coming_in_d_days)
-            String.format(format, day)
+            context.getString(R.string.period_coming_in_N_days, day)
         }
 
         // Notification shouldn't come early.

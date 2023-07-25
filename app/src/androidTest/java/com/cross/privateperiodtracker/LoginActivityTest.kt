@@ -3,17 +3,17 @@ package com.cross.privateperiodtracker
 
 import android.app.Instrumentation
 import android.content.Intent
-import androidx.test.espresso.Espresso
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.*
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.cross.privateperiodtracker.utils.Utils
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers
 import org.junit.Rule
@@ -25,12 +25,10 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class LoginActivityTest {
     @get:Rule
-    var activityScenarioRule = ActivityScenarioRule(LoginActivity::class.java)
-
+    var composeTestRule = createAndroidComposeRule<LoginActivity>()
 
     @Test
     fun checkPrivacyPolicy() {
-
         val resources = InstrumentationRegistry.getInstrumentation().targetContext.resources
 
         Intents.init()
@@ -41,20 +39,9 @@ class LoginActivityTest {
             )
         Intents.intending(expectedIntent).respondWith(Instrumentation.ActivityResult(0, null))
 
-        Utils.performActionCount(
-            action = {
-                Espresso.onView(
-                    Matchers.allOf(
-                        withId(R.id.privacyPolicyButton2),
-                        isDisplayed()
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
+        composeTestRule.onNodeWithText(resources.getString(R.string.privacy_policy)).performClick()
 
         Intents.intended(expectedIntent)
         Intents.release()
     }
-
 }

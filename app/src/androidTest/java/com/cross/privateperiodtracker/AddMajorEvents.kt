@@ -2,29 +2,33 @@ package com.cross.privateperiodtracker
 
 
 import android.Manifest
+import android.content.Intent
 import android.os.Build
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.*
-import androidx.test.espresso.assertion.ViewAssertions.*
-import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
+import androidx.core.content.ContextCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import com.cross.privateperiodtracker.data.EventType
+import com.cross.privateperiodtracker.lib.DataManager
+import com.cross.privateperiodtracker.lib.Encryptor
 import com.cross.privateperiodtracker.lib.listFiles
-import com.cross.privateperiodtracker.utils.Utils.Companion.performActionCount
-import org.hamcrest.Matchers.allOf
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-
-@LargeTest
 @RunWith(AndroidJUnit4::class)
 class AddMajorEvents {
-
     @Rule
     @JvmField
     var grantPermissionRule: GrantPermissionRule =
@@ -35,7 +39,7 @@ class AddMajorEvents {
         }
 
     @get:Rule
-    var activityScenarioRule = ActivityScenarioRule(EntryActivity::class.java)
+    val composeTestRule = createAndroidComposeRule<EntryActivity>()
 
     @Before
     fun setup() {
@@ -43,6 +47,7 @@ class AddMajorEvents {
         listFiles(files).forEach { file -> file.delete() }
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test
     fun addMajorEvents() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -51,194 +56,78 @@ class AddMajorEvents {
             )
         }
 
+        val context = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+
+        val k = Intent(context, EntryActivity::class.java)
+        k.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        ContextCompat.startActivity(context, k, null)
+
         val resources = InstrumentationRegistry.getInstrumentation().targetContext.resources
+        composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
+        composeTestRule.onNodeWithTag("duress").performClick().performTextInput("123")
+        composeTestRule.onNodeWithTag("save")
+            .assertTextContains(resources.getString(R.string.save))
+            .performClick()
+        composeTestRule.waitForIdle()
 
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(R.id.realPassword),
-                        isDisplayed()
-                    )
-                ).perform(replaceText("abc"), closeSoftKeyboard())
-            },
-            maxRepeatTimes = 20
-        )
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(R.id.duressPassword),
-                        isDisplayed()
-                    )
-                ).perform(replaceText("123"), closeSoftKeyboard())
-            },
-            maxRepeatTimes = 20
-        )
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(R.id.save), withText("Save"),
-                        isDisplayed()
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(R.id.textPassword),
-                        isDisplayed()
-                    )
-                ).perform(replaceText("abc"), closeSoftKeyboard())
-            },
-            maxRepeatTimes = 20
-        )
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(R.id.button4), withText("Login"),
-                        isDisplayed()
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(R.id.addEvent), withText(R.string.add_event),
-                        isDisplayed()
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(R.id.editTextTime),
-                        isDisplayed()
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(android.R.id.button1), withText("OK"),
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(R.id.saveEvent), withText("Save Event"),
-                        isDisplayed()
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(R.id.addEvent),
-                        isDisplayed()
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(R.id.editTextTime),
-                        isDisplayed()
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
-
-        performActionCount(
-            action = {
-                onView(
-                    allOf(
-                        withId(android.R.id.button1), withText("OK"),
-                    )
-                ).perform(click())
-            },
-            maxRepeatTimes = 20
-        )
+        composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
+        composeTestRule.onNodeWithTag("login")
+            .assertTextContains(resources.getString(R.string.login))
+            .performClick()
+        composeTestRule.waitForIdle()
 
         for (event in listOf(
-            resources.getString(R.string.tampon),
+            resources.getString(R.string.tampon_start),
+            resources.getString(R.string.tampon_stop),
             resources.getString(R.string.painkiller),
             resources.getString(R.string.period_start),
             resources.getString(R.string.period_end),
             resources.getString(R.string.pregnancy_start),
             resources.getString(R.string.pregnancy_stop)
         )) {
-            performActionCount(
-                action = {
-                    onView(
-                        allOf(
-                            withId(R.id.addEvent),
-                            isDisplayed()
-                        )
-                    ).perform(click())
-                },
-                maxRepeatTimes = 20
-            )
+            composeTestRule.onNodeWithTag("addevent")
+                .assertTextContains(resources.getString(R.string.add_event))
+                .performScrollTo()
+                .performClick()
+            composeTestRule.waitForIdle()
 
-            performActionCount(
-                action = {
-                    onView(
-                        allOf(
-                            withText(event),
-                            isDisplayed()
-                        )
-                    ).perform(click())
-                },
-                maxRepeatTimes = 20
-            )
+            composeTestRule.onNodeWithTag("eventtime").performClick()
+            composeTestRule.waitForIdle()
 
-            performActionCount(
-                action = {
-                    onView(
-                        allOf(
-                            withId(R.id.saveEvent),
-                            withText("Save Event"),
-                            isDisplayed()
-                        )
-                    ).perform(click())
-                },
-                maxRepeatTimes = 20
-            )
+            composeTestRule.onNodeWithText("OK").performClick()
+            composeTestRule.waitForIdle()
+
+            composeTestRule.onNodeWithText(event).performScrollTo().performClick()
+            composeTestRule.waitForIdle()
+
+            composeTestRule.onNodeWithTag("saveevent")
+                .assertTextContains(resources.getString(R.string.save_event))
+                .performScrollTo()
+                .performClick()
+            composeTestRule.waitForIdle()
         }
+
+        val filesDir = InstrumentationRegistry.getInstrumentation().targetContext.filesDir
+        val files = listFiles(filesDir).asSequence().toList()
+        assert(files.size == 2)
+
+        val dm = DataManager(
+            InstrumentationRegistry.getInstrumentation().targetContext,
+            Encryptor("abc")
+        )
+        dm.loadData()
+
+        for (eventtype in EventType.values()) {
+            var foundEvent = false
+            for (event in dm.data.events) {
+                if (event.type == eventtype) {
+                    foundEvent = true
+                    break
+                }
+            }
+            assertTrue("Found $eventtype", foundEvent)
+        }
+
+        assertEquals(8, dm.data.events.size)
     }
 }

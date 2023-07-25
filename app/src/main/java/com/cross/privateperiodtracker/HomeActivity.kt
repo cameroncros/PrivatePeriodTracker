@@ -4,287 +4,126 @@ import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.PopupMenu
-import android.widget.TextView
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources.getDrawable
-import androidx.core.view.children
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.cross.privateperiodtracker.data.CurrentState
 import com.cross.privateperiodtracker.data.EventType
+import com.cross.privateperiodtracker.data.PeriodCalculator
+import com.cross.privateperiodtracker.data.PeriodData
 import com.cross.privateperiodtracker.data.PeriodEvent
+import com.cross.privateperiodtracker.data.generateData
 import com.cross.privateperiodtracker.lib.DataManager
-import com.kizitonwose.calendar.core.CalendarDay
-import com.kizitonwose.calendar.core.CalendarMonth
-import com.kizitonwose.calendar.core.daysOfWeek
-import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
-import com.kizitonwose.calendar.view.MonthDayBinder
-import com.kizitonwose.calendar.view.MonthHeaderFooterBinder
-import com.kizitonwose.calendar.view.ViewContainer
+import com.cross.privateperiodtracker.theme.PrivatePeriodTrackerTheme
+import com.cross.privateperiodtracker.theme.Typography
+import com.cross.privateperiodtracker.widget.PeriodCalendar
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.util.Locale
 
 
 const val dataKey: String = "data"
 const val eventKey: String = "event"
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity : ComponentActivity() {
+
     private lateinit var dataManager: DataManager
-    private lateinit var status: TextView
-    private lateinit var stats: TextView
-    private lateinit var calendarView: com.kizitonwose.calendar.view.CalendarView
-    private lateinit var eventList: RecyclerView
-    private lateinit var menuButton: ImageView
-    private var selectedDay: LocalDate? = null
-
-    fun update() {
-        val periodData = dataManager.data
-        status.text = updateStatus()
-        stats.text = updateStats()
-
-        class DayViewContainer(view: View) : ViewContainer(view) {
-            val textView = view.findViewById<TextView>(R.id.calendarDayText)
-            val icon = view.findViewById<ImageView>(R.id.calendarDayIcon)
-
-            // Will be set when this container is bound
-            lateinit var day: LocalDate
-
-            init {
-                view.setOnClickListener {
-                    updateEventList(day)
-                    // Use the CalendarDay associated with this container.
-                }
-            }
-        }
-
-        calendarView.dayBinder =
-            object : MonthDayBinder<DayViewContainer> {
-                // Called only when a new container is needed.
-                override fun create(view: View) = DayViewContainer(view)
-
-                // Called every time we need to reuse a container.
-                override fun bind(container: DayViewContainer, data: CalendarDay) {
-                    // Set the calendar day for this container.
-                    container.day = data.date
-                    container.textView.text = data.date.dayOfMonth.toString()
-                    val events = periodData.getDayEvents(data.date)
-                    if (events.size > 0) {
-                        container.icon.visibility = View.VISIBLE
-                        when (events[0].type) {
-                            EventType.PeriodStart -> {
-                                container.icon.setImageDrawable(
-                                    getDrawable(
-                                        container.view.context,
-                                        R.drawable.icon_period_start
-                                    )
-                                )
-                            }
-
-                            EventType.PeriodEnd -> {
-                                container.icon.setImageDrawable(
-                                    getDrawable(
-                                        container.view.context,
-                                        R.drawable.icon_period_stop
-                                    )
-                                )
-                            }
-
-                            EventType.PregnancyStart -> {
-                                container.icon.setImageDrawable(
-                                    getDrawable(
-                                        container.view.context,
-                                        R.drawable.icon_pregnancy_start
-                                    )
-                                )
-                            }
-
-                            EventType.PregnancyEnd -> {
-                                container.icon.setImageDrawable(
-                                    getDrawable(
-                                        container.view.context,
-                                        R.drawable.icon_pregnancy_stop
-                                    )
-                                )
-                            }
-
-                            EventType.TamponStart -> {
-                                container.icon.setImageDrawable(
-                                    getDrawable(
-                                        container.view.context,
-                                        R.drawable.icon_tampon_start
-                                    )
-                                )
-                            }
-
-                            EventType.TamponEnd -> {
-                                container.icon.setImageDrawable(
-                                    getDrawable(
-                                        container.view.context,
-                                        R.drawable.icon_tampon_stop
-                                    )
-                                )
-                            }
-
-                            EventType.Painkiller -> {
-                                container.icon.setImageDrawable(
-                                    getDrawable(
-                                        container.view.context,
-                                        R.drawable.icon_painkiller
-                                    )
-                                )
-                            }
-                        }
-                    } else {
-                        container.icon.visibility = View.INVISIBLE
-                    }
-                }
-            }
-
-        class MonthViewContainer(view: View) : ViewContainer(view) {
-            // Alternatively, you can add an ID to the container layout and use findViewById()
-            val titles = view as ViewGroup
-        }
-
-        val firstDayOfWeek = firstDayOfWeekFromLocale()
-        val daysOfWeek = daysOfWeek(firstDayOfWeek)
-        calendarView.monthHeaderBinder =
-            object : MonthHeaderFooterBinder<MonthViewContainer> {
-                override fun create(view: View) = MonthViewContainer(view)
-                override fun bind(container: MonthViewContainer, data: CalendarMonth) {
-                    container.titles.findViewById<TextView>(R.id.currentMonthText).text =
-                        data.yearMonth.format(
-                            DateTimeFormatter.ofPattern("yyyy MMM")
-                        )
-                    container.titles.findViewById<ImageButton>(R.id.prevMonthButton)
-                        .setOnClickListener {
-                            val prevMonth = data.yearMonth.minusMonths(1)
-                            calendarView.smoothScrollToMonth(prevMonth)
-                        }
-                    container.titles.findViewById<ImageButton>(R.id.nextMonthButton)
-                        .setOnClickListener {
-                            val nextMonth = data.yearMonth.plusMonths(1)
-                            calendarView.smoothScrollToMonth(nextMonth)
-                        }
-
-                    if (container.titles.tag == null) {
-                        container.titles.tag = data.yearMonth
-                        container.titles.findViewById<LinearLayout>(R.id.dayHeader).children.map { it as TextView }
-                            .forEachIndexed { index, textView ->
-                                val dayOfWeek = daysOfWeek[index]
-                                val title =
-                                    dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-                                textView.text = title
-                            }
-                    }
-                }
-            }
-
-        val currentMonth = YearMonth.now()
-        val startMonth = currentMonth.minusYears(30)
-        val endMonth = currentMonth.plusYears(30)
-        calendarView.setup(startMonth, endMonth, firstDayOfWeek)
-        calendarView.scrollToMonth(currentMonth)
-    }
-
-    fun updateEventList(day: LocalDate) {
-        selectedDay = day
-        (eventList.adapter as EventListAdapter).updateData(dataManager.data.getDayEvents(day))
-        eventList.invalidate()
-    }
-
+    private lateinit var startForResult: ActivityResultLauncher<Intent>
     override fun onCreate(savedInstanceState: Bundle?) {
         window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE
         )
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.home_activity)
 
         @Suppress("DEPRECATION")
         dataManager = intent.getSerializableExtra(dataKey) as DataManager
 
-        status = findViewById(R.id.currentStatus)
-        stats = findViewById(R.id.currentStats)
-        calendarView = findViewById(R.id.calendarView)
-        eventList = findViewById(R.id.eventList)
-        eventList.layoutManager = LinearLayoutManager(this)
-        eventList.adapter = EventListAdapter(::deleteEventCallback)
-        menuButton = findViewById(R.id.menuButton)
+        startForResult = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val events = result.data?.extras!!.get(eventKey) as Array<*>
+                for (event in events) {
+                    dataManager.data.addEvent(event as PeriodEvent)
+                }
+                dataManager.saveData()
 
-        menuButton.setOnClickListener {
-            val popup = PopupMenu(this, menuButton)
-            val inflater: MenuInflater = popup.menuInflater
-            inflater.inflate(R.menu.main_menu, popup.menu)
-            popup.setOnMenuItemClickListener { item: MenuItem? ->
+                updateNotifications()
 
-                when (item!!.itemId) {
-                    R.id.settings -> {
-                        val k = Intent(this, SettingsActivity::class.java)
-                        startActivity(k)
+                setContent {
+                    PrivatePeriodTrackerTheme {
+                        Home(
+                            periodData = dataManager.data,
+                            addFn = {
+                                val i = Intent(this, AddEventActivity::class.java)
+                                i.putExtra(dataKey, dataManager)
+                                startForResult.launch(i)
+                            }
+                        )
                     }
                 }
-
-                return@setOnMenuItemClickListener true
             }
-            popup.show()
         }
 
-        val intentLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    @Suppress("DEPRECATION") val event: PeriodEvent =
-                        result.data?.getSerializableExtra(eventKey) as PeriodEvent
-                    dataManager.data.addEvent(event)
-                    dataManager.saveData()
-                    update()
-                }
+        setContent {
+            PrivatePeriodTrackerTheme {
+                Home(
+                    periodData = dataManager.data,
+                    addFn = {
+                        val i = Intent(this, AddEventActivity::class.java)
+                        i.putExtra(dataKey, dataManager)
+                        startForResult.launch(i)
+                    })
             }
-        val addEventButton = findViewById<Button>(R.id.addEvent)
-        addEventButton.setOnClickListener {
-            val k = Intent(this, AddEventActivity::class.java)
-            intentLauncher.launch(k)
         }
 
-        update()
-        updateNotifications()
-    }
-
-    private fun deleteEventCallback(event: PeriodEvent) {
-        dataManager.data.delete(event)
-        dataManager.saveData()
-
-        selectedDay?.let { updateEventList(it) }
-        update()
         updateNotifications()
     }
 
     private fun updateNotifications() {
         val prefs = getDefaultSharedPreferences(applicationContext)
-        if (!prefs.getBoolean("enabled", true)) {
-            return
-        }
 
         NotificationReceiver.requestSendNotificationsPermission(this)
 
-        val nextPeriodDate = dataManager.data.calcNextPeriodDate() ?: return
+        val nextPeriodDate = dataManager.data.calculator().calcNextPeriodDate() ?: return
 
         // Save next times to shared preferences.
         val spedit: SharedPreferences.Editor = prefs.edit()
@@ -302,71 +141,245 @@ class HomeActivity : AppCompatActivity() {
 
         NotificationReceiver.configNotifications(applicationContext)
     }
+}
 
-    private fun updateStats(): String {
-        val cycleStats = dataManager.data.calcAveragePeriodCycle()
-        val durationStats = dataManager.data.calcAveragePeriodDuration()
-        val sb = StringBuilder()
-        sb.append(resources.getString(R.string.your_cycle_is_))
-        sb.append(cycleStats.mean.toDays())
-        if (cycleStats.sd.toDays() > 1) {
-            sb.append("(±")
-            sb.append(cycleStats.sd.toDays())
-            sb.append(")")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Home(periodData: PeriodData, addFn: () -> Unit) {
+    val context = LocalContext.current
+    val initialSelectedDay by remember { mutableStateOf(LocalDate.now()) }
+    var calculator = periodData.calculator()
+    var dayEvents = calculator.getDayEvents(initialSelectedDay)
+
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.SpaceBetween
+    )
+    {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth(1f)
+        ) {
+            CurrentStatus(calculator)
+            IconButton(
+                onClick = {
+                    val k = Intent(context, SettingsActivity::class.java)
+                    startActivity(context, k, null)
+                },
+                modifier = Modifier.testTag("settings")
+            ) {
+                Icon(Icons.Filled.Settings, "settings")
+            }
         }
-        sb.append(resources.getString(R.string._days_and_your_average_period_is_))
-        sb.append(durationStats.mean.toDays())
-        if (durationStats.sd.toDays() > 1) {
-            sb.append("(±")
-            sb.append(durationStats.sd.toDays())
-            sb.append(")")
+        CycleStats(calculator)
+        Text(
+            style = Typography.bodySmall,
+            text = stringResource(id = R.string.this_is_not_medical_advice_if_you_have_concerns_see_a_medical_professional),
+            modifier = Modifier.padding(8.dp)
+        )
+
+        PeriodCalendar(calculator = calculator,
+            initialSelectedDay = initialSelectedDay,
+            daySelectedFn = { day: LocalDate ->
+                dayEvents = calculator.getDayEvents(day)
+            }
+        )
+
+        Row(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .weight(weight = 1f, fill = false)
+        )
+        {
+            Column(
+                modifier = Modifier
+                    .padding(8.dp)
+            ) {
+                for (it in dayEvents) {
+                    Event(event = it,
+                        delFn = { ev ->
+                            periodData.removeEvent(ev)
+                            calculator = periodData.calculator()
+                            dayEvents.remove(ev)
+                        })
+                }
+            }
         }
-        sb.append(resources.getString(R.string._days))
-        return sb.toString()
+
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth(1f)
+                .padding(16.dp)
+        )
+        {
+            Button(
+                onClick = addFn,
+                modifier = Modifier.testTag("addevent")
+            ) {
+                Icon(Icons.Filled.Add, "add")
+                Text(stringResource(id = R.string.add_event))
+            }
+        }
     }
+}
 
-    private fun updateStatus(): String {
-        when (dataManager.data.getState()) {
-            CurrentState.Period -> {
-                var endDate = dataManager.data.calcEndOfPeriodDate()
-                    ?: return resources.getString(R.string.need_more_data)
-                val cycle = dataManager.data.calcAveragePeriodCycle()
+
+@Preview(showBackground = true)
+@Composable
+fun HomePreview() {
+    val periodData = generateData()
+    PrivatePeriodTrackerTheme {
+        Home(
+            periodData = periodData,
+            addFn = {})
+    }
+}
+
+@Composable
+fun CycleStats(calculator: PeriodCalculator) {
+    val cycle = calculator.calcAveragePeriodCycle()
+    val duration = calculator.calcAveragePeriodCycle()
+    Text(
+        style = Typography.bodySmall,
+        text = stringResource(
+            id = R.string.your_cycle_is_x_days_and_your_average_period_is_y_days,
+            cycle.mean.toDays(),
+            duration.mean.toDays()
+        ),
+        modifier = Modifier.padding(8.dp)
+    )
+}
+
+@Composable
+fun CurrentStatus(calculator: PeriodCalculator) {
+    val status: String = when (calculator.getState()) {
+        CurrentState.Period -> {
+            var endDate = calculator.calcEndOfPeriodDate()
+            if (endDate == null) {
+                stringResource(R.string.need_more_data)
+            } else {
+                val cycle = calculator.calcAveragePeriodCycle()
                 while (endDate < LocalDateTime.now()) {
                     endDate += cycle.mean
                 }
                 val delta = Duration.between(LocalDateTime.now(), endDate)
-                val sb = StringBuilder()
-                sb.append(resources.getString(R.string.period_will_end_in_))
-                sb.append(delta.toDays())
-                sb.append(resources.getString(R.string._days))
-                return sb.toString()
-            }
-
-            CurrentState.Freedom -> {
-                val endDate = dataManager.data.calcNextPeriodDate()
-                    ?: return resources.getString(R.string.need_more_data)
-                val delta = Duration.between(LocalDateTime.now(), endDate)
-                val sb = StringBuilder()
-                sb.append(resources.getString(R.string.next_period_in_))
-                sb.append(delta.toDays())
-                sb.append(resources.getString(R.string._days))
-                return sb.toString()
-            }
-
-            CurrentState.Pregnant -> {
-                val startDate = dataManager.data.getPregnancyStart()
-                    ?: return resources.getString(R.string.need_more_data)
-                val delta = Duration.between(startDate, LocalDateTime.now())
-                val sb = StringBuilder()
-                sb.append(resources.getString(R.string.you_have_been_pregnant_for_))
-                sb.append(delta.toDays())
-                sb.append(resources.getString(R.string._days_congrats))
-                return sb.toString()
-            }
-
-            CurrentState.Unknown -> {
-                return resources.getString(R.string.unknown_state)
+                stringResource(R.string.period_ending_in_N_days, delta.toDays())
             }
         }
+
+        CurrentState.Freedom -> {
+            val endDate = calculator.calcNextPeriodDate()
+            if (endDate == null) {
+                stringResource(R.string.need_more_data)
+            } else {
+                val delta = Duration.between(LocalDateTime.now(), endDate)
+                stringResource(R.string.period_coming_in_N_days, delta.toDays())
+            }
+        }
+
+        CurrentState.Pregnant -> {
+            val startDate = calculator.getPregnancyStart()
+            if (startDate == null) {
+                stringResource(R.string.need_more_data)
+            } else {
+                val delta = Duration.between(startDate, LocalDateTime.now())
+                stringResource(R.string.you_have_been_pregnant_for_N_days, delta.toDays())
+            }
+        }
+
+        CurrentState.Unknown -> {
+            stringResource(R.string.unknown_state)
+        }
+    }
+    Text(text = status, modifier = Modifier.padding(8.dp))
+}
+
+@Composable
+fun Event(event: PeriodEvent, delFn: (event: PeriodEvent) -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth(1f)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth(1f)
+        ) {
+            Row {
+                var event_label = ""
+                when (event.type) {
+                    EventType.PeriodStart -> {
+                        Image(
+                            painterResource(id = R.drawable.icon_period_start),
+                            "period start"
+                        )
+                        event_label = stringResource(id = R.string.period_start)
+                    }
+
+                    EventType.PeriodEnd -> {
+                        Image(
+                            painterResource(id = R.drawable.icon_period_stop),
+                            "period stop"
+                        )
+                        event_label = stringResource(id = R.string.period_end)
+                    }
+
+                    EventType.PregnancyStart -> {
+                        Image(
+                            painterResource(id = R.drawable.icon_pregnancy_start),
+                            "pregnancy start"
+                        )
+                        event_label = stringResource(id = R.string.pregnancy_start)
+                    }
+
+                    EventType.PregnancyEnd -> {
+                        Image(
+                            painterResource(id = R.drawable.icon_pregnancy_stop),
+                            "pregnancy stop"
+                        )
+                        event_label = stringResource(id = R.string.pregnancy_stop)
+                    }
+
+                    EventType.TamponStart -> {
+                        Image(
+                            painterResource(id = R.drawable.icon_tampon_start),
+                            "tampon start"
+                        )
+                        event_label = stringResource(id = R.string.tampon_start)
+                    }
+
+                    EventType.TamponEnd -> {
+                        Image(
+                            painterResource(id = R.drawable.icon_tampon_stop),
+                            "tampon stop"
+                        )
+                        event_label = stringResource(id = R.string.tampon_stop)
+                    }
+
+                    EventType.Painkiller -> {
+                        Image(
+                            painterResource(id = R.drawable.icon_painkiller),
+                            "painkiller"
+                        )
+                        event_label = stringResource(id = R.string.painkiller)
+                    }
+                }
+                event_label += " - " + event.time.format(DateTimeFormatter.ofPattern("hh:mm a"))
+                Text(event_label)
+            }
+            IconButton(onClick = { delFn(event) }) {
+                Icon(Icons.Filled.Delete, "delete")
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EventPreview() {
+    val periodData = generateData()
+    PrivatePeriodTrackerTheme {
+        Event(event = periodData.events[0], delFn = {})
     }
 }

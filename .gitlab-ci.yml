@@ -61,12 +61,12 @@ Instrumented Tests:
   script:
     # create virtual device named "test"
     - sdkmanager --list
-    - echo no | avdmanager -v create avd -n test -k "${ANDROID_IMAGE}"
+    - avdmanager -v create avd -n test -d "Nexus 6P" -k "${ANDROID_IMAGE}"
     # start adb server
     - adb start-server
 
     # run emulator and tests
-    - emulator -avd test -no-boot-anim -no-window -no-audio -no-snapshot &
+    - emulator -avd test -no-boot-anim -no-window -no-audio -no-snapshot -gpu swiftshader_indirect &
     - android-wait-for-emulator
     - chmod +x ./gradlew
     - ./gradlew connectedDebugAndroidTest
