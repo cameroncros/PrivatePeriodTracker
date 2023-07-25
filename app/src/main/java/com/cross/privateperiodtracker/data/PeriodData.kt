@@ -17,7 +17,7 @@ enum class EventType {
 }
 
 @JsonClass(generateAdapter = true)
-data class PeriodEvent(val time: LocalDateTime, val type: EventType) : Serializable {
+data class PeriodEvent(val time: LocalDateTime, val type: EventType, val notes: String = "") : Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -25,6 +25,7 @@ data class PeriodEvent(val time: LocalDateTime, val type: EventType) : Serializa
         other as PeriodEvent
 
         if (time != other.time) return false
+        if (notes.compareTo(other.notes) != 0) return false
         if (type != other.type) return false
 
         return true
@@ -33,11 +34,12 @@ data class PeriodEvent(val time: LocalDateTime, val type: EventType) : Serializa
     override fun hashCode(): Int {
         var result = time.hashCode()
         result = 31 * result + type.hashCode()
+        result = 31 * result + notes.hashCode()
         return result
     }
 
     override fun toString(): String {
-        return "PeriodEvent(time=$time, type=$type)"
+        return "PeriodEvent(time=$time, type=$type, notes=$notes)"
     }
 }
 

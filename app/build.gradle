@@ -87,6 +87,6 @@ dependencies {
     androidTestImplementation 'androidx.test:rules:1.5.0'
     androidTestImplementation 'pl.pragmatists:JUnitParams:1.1.1'
     androidTestImplementation platform('androidx.compose:compose-bom:2022.10.00')
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.3")
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.4.3'
     ksp 'com.squareup.moshi:moshi-kotlin-codegen:1.14.0'
 }

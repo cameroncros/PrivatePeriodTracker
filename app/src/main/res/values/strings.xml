@@ -55,4 +55,5 @@
     <string name="auto_end_period">Automatically end period</string>
     <string name="auto_end_period_after">"Auto end period after: "</string>
     <string name="days">Days</string>
+    <string name="notes">Notes</string>
 </resources>
