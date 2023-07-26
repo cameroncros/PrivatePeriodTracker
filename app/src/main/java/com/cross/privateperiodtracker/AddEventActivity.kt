@@ -22,8 +22,10 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.preference.PreferenceManager
@@ -86,6 +89,7 @@ fun AddEvent(
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
     val time by remember { mutableStateOf(LocalDateTime.now()) }
+    var notes by remember { mutableStateOf(TextFieldValue()) }
     var selectedEvent by remember {
         mutableStateOf(
             when (periodData.calculator().getState(selectedDay)) {
@@ -108,8 +112,8 @@ fun AddEvent(
     )
     Column(
         modifier = Modifier
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
     ) {
         Row {
             PeriodCalendar(
@@ -118,10 +122,10 @@ fun AddEvent(
                 daySelectedFn = { day: LocalDate -> selectedDay = day })
         }
         Row(
-            Modifier
-                .fillMaxWidth(1f)
-                .clickable { showTimePicker = true }
-                .testTag("eventtime"),
+                Modifier
+                        .fillMaxWidth(1f)
+                        .clickable { showTimePicker = true }
+                        .testTag("eventtime"),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -160,10 +164,26 @@ fun AddEvent(
                 }
             }
         }
+        Row {
+            OutlinedTextField(
+                    value = notes,
+                    onValueChange = { s: TextFieldValue ->
+                        notes = s
+                    },
+                    label = {
+                        Text(
+                            stringResource(R.string.notes))
+                    },
+                    modifier = Modifier
+                            .fillMaxWidth(1f)
+                            .padding(8.dp)
+                            .testTag("notes")
+            )
+        }
         Row(
-            Modifier
-                .padding(16.dp)
-                .fillMaxWidth(1f), horizontalArrangement = Arrangement.Center
+                Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(1f), horizontalArrangement = Arrangement.Center
         ) {
             Button(
                 onClick = {
@@ -178,7 +198,7 @@ fun AddEvent(
                         else -> EventType.PeriodStart
                     }
                     val eventTime = selectedDay.atTime(time.toLocalTime())
-                    val event = PeriodEvent(eventTime, eventType)
+                    val event = PeriodEvent(eventTime, eventType, notes.text)
                     val events = mutableListOf(event)
                     if (SettingsManager.checkAutoEndPeriod(prefs) && eventType == EventType.PeriodStart) {
                         val days = SettingsManager.getAutoEndPeriodDays(prefs)

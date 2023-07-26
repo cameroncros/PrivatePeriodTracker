@@ -4,7 +4,6 @@ package com.cross.privateperiodtracker
 import android.Manifest
 import android.content.Intent
 import android.os.Build
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -13,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
@@ -47,7 +47,6 @@ class AddMajorEvents {
         listFiles(files).forEach { file -> file.delete() }
     }
 
-    @OptIn(ExperimentalTestApi::class)
     @Test
     fun addMajorEvents() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -57,6 +56,9 @@ class AddMajorEvents {
         }
 
         val context = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        SettingsManager.setAutoEndPeriod(prefs, false)
+        SettingsManager.setAutoEndPeriodDays(prefs, 0)
 
         val k = Intent(context, EntryActivity::class.java)
         k.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -69,6 +71,17 @@ class AddMajorEvents {
             .assertTextContains(resources.getString(R.string.save))
             .performClick()
         composeTestRule.waitForIdle()
+
+        val filesDir = InstrumentationRegistry.getInstrumentation().targetContext.filesDir
+        val files = listFiles(filesDir).asSequence().toList()
+        assert(files.size == 2)
+
+        val dm = DataManager(
+            InstrumentationRegistry.getInstrumentation().targetContext,
+            Encryptor("abc")
+        )
+        dm.loadData()
+        assertEquals(0, dm.data.events.size)
 
         composeTestRule.onNodeWithTag("password").performClick().performTextInput("abc")
         composeTestRule.onNodeWithTag("login")
@@ -97,6 +110,12 @@ class AddMajorEvents {
             composeTestRule.onNodeWithText("OK").performClick()
             composeTestRule.waitForIdle()
 
+            composeTestRule.onNodeWithTag("notes")
+                .performScrollTo()
+                .performClick()
+                .performTextInput("Event:\n\t${event}")
+            composeTestRule.waitForIdle()
+
             composeTestRule.onNodeWithText(event).performScrollTo().performClick()
             composeTestRule.waitForIdle()
 
@@ -107,16 +126,7 @@ class AddMajorEvents {
             composeTestRule.waitForIdle()
         }
 
-        val filesDir = InstrumentationRegistry.getInstrumentation().targetContext.filesDir
-        val files = listFiles(filesDir).asSequence().toList()
-        assert(files.size == 2)
-
-        val dm = DataManager(
-            InstrumentationRegistry.getInstrumentation().targetContext,
-            Encryptor("abc")
-        )
         dm.loadData()
-
         for (eventtype in EventType.values()) {
             var foundEvent = false
             for (event in dm.data.events) {
@@ -124,10 +134,11 @@ class AddMajorEvents {
                     foundEvent = true
                     break
                 }
+                assertTrue(event.notes.isNotEmpty())
             }
             assertTrue("Found $eventtype", foundEvent)
         }
 
-        assertEquals(8, dm.data.events.size)
+        assertEquals(EventType.values().size, dm.data.events.size)
     }
 }

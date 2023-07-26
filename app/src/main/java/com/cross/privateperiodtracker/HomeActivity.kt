@@ -27,6 +27,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -372,14 +374,24 @@ fun Event(event: PeriodEvent, delFn: (event: PeriodEvent) -> Unit) {
                 Icon(Icons.Filled.Delete, "delete")
             }
         }
+        if (event.notes.isNotEmpty()) {
+            Row {
+                OutlinedTextField(
+                    modifier = Modifier.padding(8.dp).fillMaxWidth(1.0f),
+                    value = event.notes,
+                    readOnly = true,
+                    onValueChange = {},
+                    label = { Text(stringResource(R.string.notes)) })
+            }
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun EventPreview() {
-    val periodData = generateData()
+    val event = PeriodEvent(LocalDateTime.now(), EventType.PeriodStart, "Heavy\n\tWoo! not pregs")
     PrivatePeriodTrackerTheme {
-        Event(event = periodData.events[0], delFn = {})
+        Event(event = event, delFn = {})
     }
 }
