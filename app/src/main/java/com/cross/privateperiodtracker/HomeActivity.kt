@@ -27,7 +27,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -183,12 +182,13 @@ fun Home(periodData: PeriodData, addFn: () -> Unit) {
             modifier = Modifier.padding(8.dp)
         )
 
-        PeriodCalendar(calculator = calculator,
-            initialSelectedDay = initialSelectedDay,
-            daySelectedFn = { day: LocalDate ->
-                dayEvents = calculator.getDayEvents(day)
-            }
-        )
+        PeriodCalendar(
+            padding = 16.dp,
+            calculator = calculator,
+            initialSelectedDay = initialSelectedDay
+        ) { day: LocalDate ->
+            dayEvents = calculator.getDayEvents(day)
+        }
 
         Row(
             modifier = Modifier

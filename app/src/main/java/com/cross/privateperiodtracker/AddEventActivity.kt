@@ -25,7 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -112,20 +111,21 @@ fun AddEvent(
     )
     Column(
         modifier = Modifier
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         Row {
             PeriodCalendar(
+                padding = 16.dp,
                 calculator = periodData.calculator(),
-                initialSelectedDay = LocalDate.now(),
-                daySelectedFn = { day: LocalDate -> selectedDay = day })
+                initialSelectedDay = LocalDate.now()
+            ) { day: LocalDate -> selectedDay = day }
         }
         Row(
-                Modifier
-                        .fillMaxWidth(1f)
-                        .clickable { showTimePicker = true }
-                        .testTag("eventtime"),
+            Modifier
+                .fillMaxWidth(1f)
+                .clickable { showTimePicker = true }
+                .testTag("eventtime"),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -166,24 +166,25 @@ fun AddEvent(
         }
         Row {
             OutlinedTextField(
-                    value = notes,
-                    onValueChange = { s: TextFieldValue ->
-                        notes = s
-                    },
-                    label = {
-                        Text(
-                            stringResource(R.string.notes))
-                    },
-                    modifier = Modifier
-                            .fillMaxWidth(1f)
-                            .padding(8.dp)
-                            .testTag("notes")
+                value = notes,
+                onValueChange = { s: TextFieldValue ->
+                    notes = s
+                },
+                label = {
+                    Text(
+                        stringResource(R.string.notes)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth(1f)
+                    .padding(8.dp)
+                    .testTag("notes")
             )
         }
         Row(
-                Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(1f), horizontalArrangement = Arrangement.Center
+            Modifier
+                .padding(16.dp)
+                .fillMaxWidth(1f), horizontalArrangement = Arrangement.Center
         ) {
             Button(
                 onClick = {
