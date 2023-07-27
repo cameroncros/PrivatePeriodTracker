@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.cross.privateperiodtracker.R
 import com.cross.privateperiodtracker.data.EventType
@@ -56,6 +57,7 @@ import java.util.Locale
 
 @Composable
 fun PeriodCalendar(
+    padding: Dp,
     calculator: PeriodCalculator,
     initialSelectedDay: LocalDate,
     daySelectedFn: (day: LocalDate) -> Unit,
@@ -102,7 +104,7 @@ fun PeriodCalendar(
             Box(
                 modifier = Modifier
                     .width(screenWidth)
-                    .padding(8.dp)
+                    .padding(end=padding*2)
             ) {
                 container()
             }
@@ -254,9 +256,9 @@ fun PeriodCalendarPreview() {
     val periodData = generateData()
     PrivatePeriodTrackerTheme {
         PeriodCalendar(
+            padding=0.dp,
             calculator = periodData.calculator(),
             initialSelectedDay = LocalDate.now(),
-            daySelectedFn = { _: LocalDate -> },
-        )
+        ) { _: LocalDate -> }
     }
 }
