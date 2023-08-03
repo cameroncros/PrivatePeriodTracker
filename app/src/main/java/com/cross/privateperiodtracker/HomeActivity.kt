@@ -302,7 +302,9 @@ fun CurrentStatus(calculator: PeriodCalculator) {
 
 @Composable
 fun Event(event: PeriodEvent, delFn: (event: PeriodEvent) -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth(1f)) {
+    Card(modifier = Modifier
+        .fillMaxWidth(1f)
+        .testTag("periodevent")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,

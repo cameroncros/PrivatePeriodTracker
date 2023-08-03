@@ -4,7 +4,9 @@ package com.cross.privateperiodtracker
 import android.Manifest
 import android.content.Intent
 import android.os.Build
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -47,6 +49,7 @@ class AddMajorEvents {
         listFiles(files).forEach { file -> file.delete() }
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test
     fun addMajorEvents() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -104,6 +107,9 @@ class AddMajorEvents {
                 .performClick()
             composeTestRule.waitForIdle()
 
+            composeTestRule.onNodeWithText("15").performClick()
+            composeTestRule.waitForIdle()
+
             composeTestRule.onNodeWithTag("eventtime").performClick()
             composeTestRule.waitForIdle()
 
@@ -125,6 +131,11 @@ class AddMajorEvents {
                 .performClick()
             composeTestRule.waitForIdle()
         }
+
+        composeTestRule.onNodeWithText("15").performClick()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.waitUntilNodeCount(hasTestTag("periodevent"), 7)
 
         dm.loadData()
         for (eventtype in EventType.values()) {
