@@ -33,6 +33,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -97,8 +99,13 @@ class HomeActivity : ComponentActivity() {
                                 val i = Intent(this, AddEventActivity::class.java)
                                 i.putExtra(dataKey, dataManager)
                                 startForResult.launch(i)
+                            },
+                            delFn = {
+                                dataManager.data.removeEvent(it)
+                                dataManager.saveData()
                             }
                         )
+
                     }
                 }
             }
@@ -112,6 +119,10 @@ class HomeActivity : ComponentActivity() {
                         val i = Intent(this, AddEventActivity::class.java)
                         i.putExtra(dataKey, dataManager)
                         startForResult.launch(i)
+                    },
+                    delFn = {
+                        dataManager.data.removeEvent(it)
+                        dataManager.saveData()
                     })
             }
         }
@@ -146,12 +157,12 @@ class HomeActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Home(periodData: PeriodData, addFn: () -> Unit) {
+fun Home(periodData: PeriodData, addFn: () -> Unit, delFn: (p: PeriodEvent) -> Unit) {
     val context = LocalContext.current
-    val initialSelectedDay by remember { mutableStateOf(LocalDate.now()) }
-    var calculator = periodData.calculator()
-    var dayEvents = calculator.getDayEvents(initialSelectedDay)
+    var initialSelectedDay by remember { mutableStateOf(LocalDate.now()) }
+    val calculator = periodData.calculator()
 
+    var dayEvents = remember { calculator.getDayEvents(initialSelectedDay).toMutableStateList() }
 
     Column(
         modifier = Modifier
@@ -187,28 +198,16 @@ fun Home(periodData: PeriodData, addFn: () -> Unit) {
             calculator = calculator,
             initialSelectedDay = initialSelectedDay
         ) { day: LocalDate ->
-            dayEvents = calculator.getDayEvents(day)
+            dayEvents.clear()
+            dayEvents.addAll(calculator.getDayEvents(day))
         }
 
-        Row(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .weight(weight = 1f, fill = false)
-        )
-        {
-            Column(
-                modifier = Modifier
-                    .padding(8.dp)
-            ) {
-                for (it in dayEvents) {
-                    Event(event = it,
-                        delFn = { ev ->
-                            periodData.removeEvent(ev)
-                            calculator = periodData.calculator()
-                            dayEvents.remove(ev)
-                        })
-                }
-            }
+        for (it in dayEvents) {
+            Event(event = it,
+                delFn = { ev ->
+                    delFn(ev)
+                    dayEvents.remove(ev)
+                })
         }
 
         Row(
@@ -237,7 +236,8 @@ fun HomePreview() {
     PrivatePeriodTrackerTheme {
         Home(
             periodData = periodData,
-            addFn = {})
+            addFn = {},
+            delFn = {})
     }
 }
 
@@ -377,7 +377,9 @@ fun Event(event: PeriodEvent, delFn: (event: PeriodEvent) -> Unit) {
         if (event.notes.isNotEmpty()) {
             Row {
                 OutlinedTextField(
-                    modifier = Modifier.padding(8.dp).fillMaxWidth(1.0f),
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(1.0f),
                     value = event.notes,
                     readOnly = true,
                     onValueChange = {},
